@@ -1,0 +1,52 @@
+# Variables y secretos
+.env
+*.env
+!.env.example
+
+# Backups y dumps pesados
+*.backup
+*.dump
+*.bak
+*.sql.gz
+*.zip
+*.rar
+*.7z
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+*.lock
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# DBeaver
+.dbeaver/
+*.dbeaver-data-sources.xml
+
+# Apache Hop - ejecución y caché
+execution-information/
+audit/
+logs/
+*.lck
+
+# Datasets grandes
+data/raw/*.csv
+data/raw/*.xlsx
+data/raw/*.json
+datasets/*.csv
+datasets/*.xlsx
+datasets/*.json
+
+# Permitir README dentro de carpetas de datos
+!data/raw/README.md
+!data/sample/README.md
+!datasets/README.md
+
+# IDEs
+.vscode/
+.idea/metadata/rdbms/*.json
+metadata/rdbms/
