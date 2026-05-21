@@ -34,12 +34,12 @@ logs/
 *.lck
 
 # Datasets grandes
-data/raw/*.csv
-data/raw/*.xlsx
-data/raw/*.json
-datasets/*.csv
-datasets/*.xlsx
-datasets/*.json
+#data/raw/*.csv
+#data/raw/*.xlsx
+#data/raw/*.json
+#datasets/*.csv
+#datasets/*.xlsx
+#datasets/*.json
 
 # Permitir README dentro de carpetas de datos
 !data/raw/README.md
