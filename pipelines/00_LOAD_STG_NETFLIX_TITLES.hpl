@@ -42,7 +42,7 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <filename>C:\Users\User\Documents\Universidad\BD3\ProyectoBD3-apache-hop-792160\apache-logs-792160-Netflix-Repo\datasets\NetFlix.csv</filename>
+    <filename>${PROJECT_HOME}/datasets/NetFlix.csv</filename>
     <filename_field/>
     <rownum_field/>
     <include_filename>N</include_filename>
@@ -198,6 +198,96 @@
     </GUI>
   </transform>
   <transform>
+    <name>Cargar staging titles</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <add_columns>N</add_columns>
+    <always_drop_and_recreate>N</always_drop_and_recreate>
+    <auto_update_table_structure>N</auto_update_table_structure>
+    <change_column_types>N</change_column_types>
+    <commit>1000</commit>
+    <connection>neon</connection>
+    <drop_columns>N</drop_columns>
+    <fields>
+      <field>
+        <column_name>cast_members</column_name>
+        <stream_name>cast_members</stream_name>
+      </field>
+      <field>
+        <column_name>show_id</column_name>
+        <stream_name>show_id</stream_name>
+      </field>
+      <field>
+        <column_name>type</column_name>
+        <stream_name>type</stream_name>
+      </field>
+      <field>
+        <column_name>title</column_name>
+        <stream_name>title</stream_name>
+      </field>
+      <field>
+        <column_name>director</column_name>
+        <stream_name>director</stream_name>
+      </field>
+      <field>
+        <column_name>country</column_name>
+        <stream_name>country</stream_name>
+      </field>
+      <field>
+        <column_name>date_added</column_name>
+        <stream_name>date_added</stream_name>
+      </field>
+      <field>
+        <column_name>release_year</column_name>
+        <stream_name>release_year</stream_name>
+      </field>
+      <field>
+        <column_name>rating</column_name>
+        <stream_name>rating</stream_name>
+      </field>
+      <field>
+        <column_name>duration</column_name>
+        <stream_name>duration</stream_name>
+      </field>
+      <field>
+        <column_name>genres</column_name>
+        <stream_name>genres</stream_name>
+      </field>
+      <field>
+        <column_name>description</column_name>
+        <stream_name>description</stream_name>
+      </field>
+    </fields>
+    <ignore_errors>N</ignore_errors>
+    <only_when_have_rows>N</only_when_have_rows>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
+    <return_keys>N</return_keys>
+    <schema>staging</schema>
+    <specify_fields>N</specify_fields>
+    <table>stg_netflix_titles</table>
+    <tablename_field/>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_in_table>Y</tablename_in_table>
+    <truncate>Y</truncate>
+    <use_batch>Y</use_batch>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>112</yloc>
+    </GUI>
+  </transform>
+  <transform>
     <name>Renombrar campos titles</name>
     <type>SelectValues</type>
     <description/>
@@ -286,96 +376,6 @@
     <attributes/>
     <GUI>
       <xloc>352</xloc>
-      <yloc>112</yloc>
-    </GUI>
-  </transform>
-  <transform>
-    <name>Cargar staging titles</name>
-    <type>TableOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <add_columns>N</add_columns>
-    <always_drop_and_recreate>N</always_drop_and_recreate>
-    <auto_update_table_structure>N</auto_update_table_structure>
-    <change_column_types>N</change_column_types>
-    <commit>1000</commit>
-    <connection>Proyecto-Neonbd</connection>
-    <drop_columns>N</drop_columns>
-    <fields>
-      <field>
-        <column_name>show_id</column_name>
-        <stream_name>show_id</stream_name>
-      </field>
-      <field>
-        <column_name>type</column_name>
-        <stream_name>type</stream_name>
-      </field>
-      <field>
-        <column_name>title</column_name>
-        <stream_name>title</stream_name>
-      </field>
-      <field>
-        <column_name>director</column_name>
-        <stream_name>director</stream_name>
-      </field>
-      <field>
-        <column_name>country</column_name>
-        <stream_name>country</stream_name>
-      </field>
-      <field>
-        <column_name>date_added</column_name>
-        <stream_name>date_added</stream_name>
-      </field>
-      <field>
-        <column_name>release_year</column_name>
-        <stream_name>release_year</stream_name>
-      </field>
-      <field>
-        <column_name>rating</column_name>
-        <stream_name>rating</stream_name>
-      </field>
-      <field>
-        <column_name>duration</column_name>
-        <stream_name>duration</stream_name>
-      </field>
-      <field>
-        <column_name>genres</column_name>
-        <stream_name>genres</stream_name>
-      </field>
-      <field>
-        <column_name>description</column_name>
-        <stream_name>description</stream_name>
-      </field>
-      <field>
-        <column_name>cast_members</column_name>
-        <stream_name>cast_members</stream_name>
-      </field>
-    </fields>
-    <ignore_errors>N</ignore_errors>
-    <only_when_have_rows>N</only_when_have_rows>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <return_field/>
-    <return_keys>N</return_keys>
-    <schema>staging</schema>
-    <specify_fields>Y</specify_fields>
-    <table>stg_netflix_titles</table>
-    <tablename_field/>
-    <tablename_in_field>N</tablename_in_field>
-    <tablename_in_table>Y</tablename_in_table>
-    <truncate>Y</truncate>
-    <use_batch>Y</use_batch>
-    <attributes/>
-    <GUI>
-      <xloc>544</xloc>
       <yloc>112</yloc>
     </GUI>
   </transform>

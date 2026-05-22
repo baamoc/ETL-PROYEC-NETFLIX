@@ -21,6 +21,12 @@
 4. Actualizar `resumen-avance.md` si el avance cambia.
 5. Registrar la actividad en la bitacora del dia.
 
+## Tareas para el equipo (antes del pipeline 2)
+
+1. Subir evidencias de los pipelines terminados a `docs/evidencias/`.
+2. Confirmar que la carga a `staging` esta validada con conteos.
+3. Actualizar `resumen-avance.md` con el estado real.
+
 ## Evidencias minimas por pipeline
 
 - Archivo `.hpl`.

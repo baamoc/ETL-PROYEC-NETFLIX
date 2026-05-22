@@ -2,7 +2,7 @@
 
 
 
-Fecha: 2026-05-20
+Fecha: 2026-05-22
 
 
 
@@ -96,6 +96,8 @@ Columnas:
 
 Nota: el CSV original tenía la columna `cast`, pero se renombró a `cast\_members` por conflicto SQL.
 
+Conteo validado (2026-05-22): 7787
+
 
 
 \### staging.stg\_netflix\_userbase
@@ -129,6 +131,8 @@ Columnas:
 
 
 Regla: staging conserva nombres crudos/originales del CSV.
+
+Conteo validado (2026-05-22): 2500
 
 
 
@@ -301,4 +305,3 @@ Regla:
 
 
 \- No insertar id\_suscripcion manualmente, porque PostgreSQL lo genera automáticamente.
-

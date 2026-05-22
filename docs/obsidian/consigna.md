@@ -37,6 +37,7 @@ Implementacion de un Data Warehouse
    - Desarrollar procesos ETL para cargar el Data Warehouse.
    - Documentar el flujo de datos desde fuentes originales hasta el Data Mart.
    - Implementar el proceso ETL en Pentaho PDI y realizar la carga completa de datos.
+   - Nota del proyecto: el equipo usa Apache Hop como reemplazo oficial de Pentaho PDI.
 
 7. **Cubos OLAP**
    - Crear cubos OLAP para analisis multidimensional.
