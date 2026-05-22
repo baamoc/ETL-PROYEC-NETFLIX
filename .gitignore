@@ -33,6 +33,9 @@ audit/
 logs/
 *.lck
 
+# Apache Hop - conexiones locales (no versionar)
+metadata/rdbms.local/
+
 # Datasets grandes
 #data/raw/*.csv
 #data/raw/*.xlsx
@@ -50,3 +53,8 @@ logs/
 .vscode/
 .idea/metadata/rdbms/*.json
 metadata/rdbms/
+
+# DOCS 
+
+docs/.obsidian/
+
