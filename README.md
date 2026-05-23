@@ -264,15 +264,16 @@ Completado:
 
 
 
-Pipeline completado:
+Pipelines completados:
 
 
 
 \- 01\_ETL\_DIM\_DISPOSITIVO.hpl
+\- 02\_ETL\_DIM\_SUSCRIPCION.hpl
 
 
 
-Resultado validado:
+Resultados validados:
 
 
 
@@ -284,13 +285,17 @@ Resultado validado:
 
 \- 4 | Tablet
 
+Suscripciones:
+
+\- 1 | Basic | 1 Month
+\- 2 | Premium | 1 Month
+\- 3 | Standard | 1 Month
+
 
 
 \## Pipelines pendientes
 
 
-
-\- 02\_ETL\_DIM\_SUSCRIPCION.hpl
 
 \- 03\_ETL\_DIM\_USUARIO.hpl
 
