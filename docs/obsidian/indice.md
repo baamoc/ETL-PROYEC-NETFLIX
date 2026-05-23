@@ -20,6 +20,7 @@
 ## Bitacoras
 
 - [[bitacoras/2026-05-20-cierre-neon]]
+- [[bitacoras/2026-05-22-etl-dim-suscripcion]]
 
 ## Archivo
 
