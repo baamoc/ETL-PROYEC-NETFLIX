@@ -244,15 +244,15 @@ Uso previsto:
 
 
 
-Se crearon los documentos:
+Se crearon los documentos equivalentes actuales:
 
 
 
-\- docs/estado-actual.md
+\- docs/documentacion-interna/seguimiento/resumen-avance.md
 
-\- docs/decisiones-tecnicas.md
+\- docs/documentacion-interna/reglas/decisiones-tecnicas.md
 
-\- docs/guia-companeros.md
+\- docs/documentacion-interna/guias/guia-colaboracion.md
 
 
 
@@ -718,7 +718,7 @@ Resultados esperados para suscripción:
 
 9\. No subir metadata/rdbms.
 
-10\. Toda evidencia debe ir en docs/evidencias.
+10\. Toda validacion relevante debe quedar documentada en la documentacion interna del proyecto.
 
 11\. No tocar hechos hasta validar dimensiones.
 

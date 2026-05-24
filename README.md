@@ -1,405 +1,112 @@
-\# DW Netflix - Data Warehouse Streaming
+# DW Netflix - Data Warehouse Streaming
+
+Proyecto de Base de Datos 3 orientado al diseno e implementacion de un Data Warehouse para analizar usuarios, contenido, suscripciones, dispositivos, tiempo e ingresos en una plataforma de streaming tipo Netflix.
 
+## Estado actual
 
+- `staging.stg_netflix_titles` cargada y validada con `7787` registros.
+- `staging.stg_netflix_userbase` cargada y validada con `2500` registros.
+- ETL completadas y validadas: `01_ETL_DIM_DISPOSITIVO.hpl`, `02_ETL_DIM_SUSCRIPCION.hpl`, `03_ETL_DIM_USUARIO.hpl`, `04_ETL_DIM_TIEMPO.hpl`.
+- Pendientes funcionales: `05_ETL_DIM_PAIS.hpl`, `06_ETL_DIM_CONTENIDO.hpl`, `07_ETL_FACT_INGRESOS.hpl`, `08_ETL_FACT_CONSUMO.hpl`, `00_RUN_ETL_COMPLETO.hwf`.
 
-Proyecto de Base de Datos 3 orientado al diseño e implementación de un Data Warehouse para el análisis integrado de usuarios, contenido, ingresos, dispositivos, suscripciones, países, tiempo y consumo en una plataforma de streaming tipo Netflix.
+## Objetivo
 
+Construir un Data Warehouse reproducible y documentado que permita responder preguntas como estas:
 
+- distribucion de usuarios por edad, genero y pais
+- ingresos por tipo de suscripcion
+- uso de dispositivos
+- evolucion temporal del contenido y de los ingresos
+- analisis posterior de hechos de consumo e ingresos
 
-\## Objetivo
+## Arquitectura de datos
 
+```text
+CSV Kaggle
+   -> staging
+   -> Apache Hop ETL
+   -> dm_streaming
+   -> Consultas OLAP / Reportes / Dashboard
+```
 
+## Herramientas oficiales
 
-Diseñar e implementar un Data Warehouse que permita analizar:
+| Area | Herramienta | Uso |
+| --- | --- | --- |
+| Base de datos | PostgreSQL | Motor principal del DW |
+| Base compartida | Neon PostgreSQL | Trabajo colaborativo |
+| Cliente SQL | DBeaver | Validacion y consultas |
+| ETL | Apache Hop | Carga y transformacion |
+| Versionado | Git / GitHub | Trabajo en equipo |
 
+Regla clave: DBeaver no se usa como herramienta ETL. Las cargas al modelo final se hacen con Apache Hop.
 
+## Estructura funcional actual
 
-\- Distribución de usuarios por edad, género y país.
+### staging
 
-\- Ingresos por tipo de suscripción.
+- `staging.stg_netflix_titles`
+  Campos principales: `show_id`, `type`, `title`, `director`, `cast_members`, `country`, `date_added`, `release_year`, `rating`, `duration`, `genres`, `description`.
+- `staging.stg_netflix_userbase`
+  Campos principales: `"User ID"`, `"Subscription Type"`, `"Monthly Revenue"`, `"Join Date"`, `"Last Payment Date"`, `country`, `age`, `gender`, `device`, `"Plan Duration"`.
 
-\- Uso de dispositivos.
+### dm_streaming
 
-\- Catálogo de contenido por tipo, país y género.
+Dimensiones actuales:
 
-\- Evolución temporal de contenidos e ingresos.
+- `dim_usuario`
+- `dim_pais`
+- `dim_tiempo`
+- `dim_contenido`
+- `dim_suscripcion`
+- `dim_dispositivo`
 
-\- Patrones de consumo simulados/controlados.
+Tablas de hechos actuales:
 
+- `fact_consumo`
+- `fact_ingresos`
 
+## Estado ETL por pipeline
 
-\## Arquitectura oficial
+| Pipeline | Estado | Observacion |
+| --- | --- | --- |
+| `00_LOAD_STG_NETFLIX_TITLES.hpl` | Creado | Carga inicial a `staging.stg_netflix_titles` |
+| `00_LOAD_STG_NETFLIX_USERBASE.hpl` | Creado | Carga inicial a `staging.stg_netflix_userbase` |
+| `01_ETL_DIM_DISPOSITIVO.hpl` | Validado | Resultado final de 4 dispositivos unicos |
+| `02_ETL_DIM_SUSCRIPCION.hpl` | Validado | Resultado final de 3 tipos de suscripcion |
+| `03_ETL_DIM_USUARIO.hpl` | Validado | Resultado final de `2500` usuarios |
+| `04_ETL_DIM_TIEMPO.hpl` | Validado | Carga `1837` fechas unicas en `dm_streaming.dim_tiempo` |
+| `05_ETL_DIM_PAIS.hpl` | Pendiente | Requiere separar multiples paises por fila |
+| `06_ETL_DIM_CONTENIDO.hpl` | Pendiente | No iniciado en esta documentacion |
+| `07_ETL_FACT_INGRESOS.hpl` | Pendiente | No iniciado en esta documentacion |
+| `08_ETL_FACT_CONSUMO.hpl` | Pendiente | Requiere logica simulada/controlada |
+| `00_RUN_ETL_COMPLETO.hwf` | Pendiente | Orquestacion final |
 
+## Documentacion util
 
+- `docs/documentacion-interna/indice.md` -> mapa rapido de la documentacion interna
+- `docs/documentacion-interna/guias/` -> uso del espacio documental y colaboracion
+- `docs/documentacion-interna/reglas/` -> reglas y decisiones del proyecto
+- `docs/documentacion-interna/seguimiento/` -> resumen operativo y registros por fecha
+- `docs/documentacion-interna/referencias/documentacion-interna-completa.md` -> referencia interna consolidada
+- `docs/informe-oficial/Netflix-Estructura-del-proyecto.md` -> informe base de la primera presentacion
 
-CSV Kaggle  
+## Reglas operativas clave
 
-↓  
+- no insertar manualmente en `dm_streaming`
+- todo pipeline debe partir de `staging`
+- `staging` puede conservar nombres crudos del CSV
+- `dm_streaming` debe usar nombres limpios y orientados al analisis
+- no modificar tablas finales sin aprobacion
+- las transformaciones de Hop deben tener nombres descriptivos
 
-staging  
+## Riesgos conocidos
 
-↓  
+- `dim_pais` no puede cargarse directo desde `country` cuando hay multiples paises en una misma celda.
+- `fact_consumo` no tiene relacion natural directa entre los datasets y necesitara una logica controlada y documentada.
 
-Apache Hop ETL  
+## Proximo paso recomendado
 
-↓  
-
-dm\_streaming  
-
-↓  
-
-Consultas OLAP  
-
-↓  
-
-Reportes  
-
-↓  
-
-Dashboard / KPIs  
-
-
-
-\## Herramientas
-
-
-
-\- PostgreSQL
-
-\- DBeaver
-
-\- Apache Hop
-
-\- Git / GitHub
-
-\- Neon PostgreSQL
-
-\- Herramienta de dashboard por definir
-
-
-
-\## Base de datos local
-
-
-
-Base actual:
-
-
-
-\- dw\_netflix
-
-
-
-Esquemas:
-
-
-
-\- staging
-
-\- dm\_streaming
-
-
-
-Encoding esperado:
-
-
-
-\- UTF8
-
-
-
-Validación:
-
-
-
-\- SHOW server\_encoding;
-
-
-
-\## Staging
-
-
-
-\### staging.stg\_netflix\_titles
-
-
-
-Columnas:
-
-
-
-\- show\_id
-
-\- type
-
-\- title
-
-\- director
-
-\- cast\_members
-
-\- country
-
-\- date\_added
-
-\- release\_year
-
-\- rating
-
-\- duration
-
-\- genres
-
-\- description
-
-
-
-Nota: en el CSV original existía la columna `cast`, pero se renombró a `cast\_members` por conflicto SQL.
-
-
-
-\### staging.stg\_netflix\_userbase
-
-
-
-Columnas originales del CSV:
-
-
-
-\- "User ID"
-
-\- "Subscription Type"
-
-\- "Monthly Revenue"
-
-\- "Join Date"
-
-\- "Last Payment Date"
-
-\- country
-
-\- age
-
-\- gender
-
-\- device
-
-\- "Plan Duration"
-
-
-
-Regla: staging conserva nombres crudos del CSV.
-
-
-
-\## DataMart final
-
-
-
-Esquema:
-
-
-
-\- dm\_streaming
-
-
-
-Dimensiones:
-
-
-
-\- dim\_usuario
-
-\- dim\_pais
-
-\- dim\_tiempo
-
-\- dim\_contenido
-
-\- dim\_suscripcion
-
-\- dim\_dispositivo
-
-
-
-Hechos:
-
-
-
-\- fact\_consumo
-
-\- fact\_ingresos
-
-
-
-\## Estado actual
-
-
-
-Completado:
-
-
-
-\- Modelo conceptual.
-
-\- Modelo lógico.
-
-\- Modelo físico inicial.
-
-\- PostgreSQL local operativo.
-
-\- DBeaver configurado.
-
-\- Apache Hop configurado.
-
-\- Base UTF8 corregida.
-
-\- staging implementado.
-
-\- CSV reales cargados en staging.
-
-\- dm\_streaming recreado.
-
-\- Primer pipeline oficial ejecutado.
-
-
-
-Pipelines completados:
-
-
-
-\- 01\_ETL\_DIM\_DISPOSITIVO.hpl
-\- 02\_ETL\_DIM\_SUSCRIPCION.hpl
-
-
-
-Resultados validados:
-
-
-
-\- 1 | Laptop
-
-\- 2 | Smart TV
-
-\- 3 | Smartphone
-
-\- 4 | Tablet
-
-Suscripciones:
-
-\- 1 | Basic | 1 Month
-\- 2 | Premium | 1 Month
-\- 3 | Standard | 1 Month
-
-
-
-\## Pipelines pendientes
-
-
-
-\- 03\_ETL\_DIM\_USUARIO.hpl
-
-\- 04\_ETL\_DIM\_TIEMPO.hpl
-
-\- 05\_ETL\_DIM\_PAIS.hpl
-
-\- 06\_ETL\_DIM\_CONTENIDO.hpl
-
-\- 07\_ETL\_FACT\_INGRESOS.hpl
-
-\- 08\_ETL\_FACT\_CONSUMO.hpl
-
-\- 00\_RUN\_ETL\_COMPLETO.hwf
-
-
-
-\## Reglas obligatorias
-
-
-
-1\. DBeaver no es ETL oficial.
-
-2\. DBeaver solo se usa para validar, auditar y administrar.
-
-3\. Apache Hop es la herramienta ETL oficial.
-
-4\. No insertar manualmente en `dm\_streaming`.
-
-5\. Todo pipeline debe salir desde `staging`.
-
-6\. staging puede tener nombres crudos.
-
-7\. dm\_streaming debe tener nombres limpios.
-
-8\. No borrar staging.
-
-9\. No ejecutar DROP, DELETE o TRUNCATE sin autorización.
-
-10\. Todo cambio estructural debe ir en script SQL.
-
-11\. Toda carga debe ir en pipeline Hop.
-
-12\. Toda evidencia debe guardarse en `docs/evidencias`.
-
-
-
-\## Entrega por pipeline
-
-
-
-Cada pipeline debe entregar:
-
-
-
-1\. Archivo `.hpl`.
-
-2\. Captura del pipeline completo.
-
-3\. Capturas de configuración.
-
-4\. Log de ejecución.
-
-5\. Consulta SQL de validación.
-
-6\. Captura del resultado.
-
-
-
-\## Riesgos importantes
-
-
-
-\### fact\_consumo
-
-
-
-Los datasets Netflix Titles y Netflix Userbase no tienen una relación natural directa. Por eso `fact\_consumo` debe construirse mediante lógica simulada/controlada y documentada.
-
-
-
-\### dim\_pais
-
-
-
-El campo `country` de Netflix Titles puede contener múltiples países en una sola celda, por ejemplo:
-
-
-
-\- Argentina, Brazil, France
-
-
-
-Por eso `dim\_pais` no debe cargarse directamente sin separación previa en Apache Hop.
-
-
-
-\## Próximo paso recomendado
-
-
-
-Crear y validar:
-
-
-
-\- 02\_ETL\_DIM\_SUSCRIPCION.hpl
-
+1. Continuar con `05_ETL_DIM_PAIS.hpl`.
+2. Dejar listo el bloque de dimensiones antes de pasar a hechos.
+3. Mantener la validacion documental al dia en `docs/documentacion-interna/seguimiento/registros/`.

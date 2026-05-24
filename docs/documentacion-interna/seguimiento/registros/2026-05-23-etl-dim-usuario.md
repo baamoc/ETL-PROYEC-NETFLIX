@@ -67,7 +67,3 @@ LIMIT 20;
 Resultado:
 
 - total_usuarios = 2500
-
-## Siguiente paso
-
-- Guardar evidencia en `docs/evidencias/hop/03_ETL_DIM_USUARIO.md`.

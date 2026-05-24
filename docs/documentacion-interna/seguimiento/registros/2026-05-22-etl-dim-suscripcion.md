@@ -98,16 +98,9 @@ Pendiente:
 - 08_ETL_FACT_CONSUMO.hpl
 - 00_RUN_ETL_COMPLETO.hwf
 
-## Siguiente pipeline recomendado
-
-- `03_ETL_DIM_USUARIO.hpl`
-- Origen: `staging.stg_netflix_userbase`
-- Campos: `"User ID"`, `age`, `gender`
-- Destino: `dm_streaming.dim_usuario` (`id_usuario`, `edad`, `genero`)
-
 ## Reglas para continuar
 
 - Trabajar contra Neon.
 - DBeaver solo para validar.
 - No cargar manualmente en `dm_streaming`.
-- Guardar evidencias en `docs/evidencias/`.
+- Dejar la validacion registrada en la documentacion interna del proyecto.
