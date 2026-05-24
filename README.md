@@ -76,7 +76,7 @@ Tablas de hechos actuales:
 | `02_ETL_DIM_SUSCRIPCION.hpl` | Validado | Resultado final de 3 tipos de suscripcion |
 | `03_ETL_DIM_USUARIO.hpl` | Validado | Resultado final de `2500` usuarios |
 | `04_ETL_DIM_TIEMPO.hpl` | Validado | Carga `1837` fechas unicas en `dm_streaming.dim_tiempo` |
-| `05_ETL_DIM_PAIS.hpl` | Pendiente | Requiere separar multiples paises por fila |
+| `05_ETL_DIM_PAIS.hpl` | Validado | Carga `117` países únicos separando países múltiples |
 | `06_ETL_DIM_CONTENIDO.hpl` | Pendiente | No iniciado en esta documentacion |
 | `07_ETL_FACT_INGRESOS.hpl` | Pendiente | No iniciado en esta documentacion |
 | `08_ETL_FACT_CONSUMO.hpl` | Pendiente | Requiere logica simulada/controlada |
@@ -107,6 +107,6 @@ Tablas de hechos actuales:
 
 ## Proximo paso recomendado
 
-1. Continuar con `05_ETL_DIM_PAIS.hpl`.
+1. Construir `06_ETL_DIM_PAIS.hpl` 
 2. Dejar listo el bloque de dimensiones antes de pasar a hechos.
 3. Mantener la validacion documental al dia en `docs/documentacion-interna/seguimiento/registros/`.
