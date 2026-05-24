@@ -68,19 +68,19 @@ Hechos:
 
 ## 4. Estado de pipelines
 
-| Pipeline | Estado | Resumen |
-| --- | --- | --- |
-| `00_LOAD_STG_NETFLIX_TITLES.hpl` | Creado | Carga `NetFlix.csv` a `staging.stg_netflix_titles` |
-| `00_LOAD_STG_NETFLIX_USERBASE.hpl` | Creado | Carga `Netflix Userbase.csv` a `staging.stg_netflix_userbase` |
-| `01_ETL_DIM_DISPOSITIVO.hpl` | Validado | Carga 4 dispositivos unicos a `dim_dispositivo` |
-| `02_ETL_DIM_SUSCRIPCION.hpl` | Validado | Carga 3 combinaciones a `dim_suscripcion` |
-| `03_ETL_DIM_USUARIO.hpl` | Validado | Carga `2500` usuarios a `dim_usuario` |
-| `04_ETL_DIM_TIEMPO.hpl` | Validado | Lee fechas desde `titles` y `userbase` y cargo `1837` fechas unicas en `dim_tiempo` |
-| `05_ETL_DIM_PAIS.hpl` | Pendiente | Debe resolver paises multiples por fila |
-| `06_ETL_DIM_CONTENIDO.hpl` | Pendiente | No documentado aun |
-| `07_ETL_FACT_INGRESOS.hpl` | Pendiente | No documentado aun |
-| `08_ETL_FACT_CONSUMO.hpl` | Pendiente | Requiere logica simulada/controlada |
-| `00_RUN_ETL_COMPLETO.hwf` | Pendiente | Workflow final |
+| Pipeline                           | Estado    | Resumen                                                                             |
+| ---------------------------------- | --------- | ----------------------------------------------------------------------------------- |
+| `00_LOAD_STG_NETFLIX_TITLES.hpl`   | Creado    | Carga `NetFlix.csv` a `staging.stg_netflix_titles`                                  |
+| `00_LOAD_STG_NETFLIX_USERBASE.hpl` | Creado    | Carga `Netflix Userbase.csv` a `staging.stg_netflix_userbase`                       |
+| `01_ETL_DIM_DISPOSITIVO.hpl`       | Validado  | Carga 4 dispositivos unicos a `dim_dispositivo`                                     |
+| `02_ETL_DIM_SUSCRIPCION.hpl`       | Validado  | Carga 3 combinaciones a `dim_suscripcion`                                           |
+| `03_ETL_DIM_USUARIO.hpl`           | Validado  | Carga `2500` usuarios a `dim_usuario`                                               |
+| `04_ETL_DIM_TIEMPO.hpl`            | Validado  | Lee fechas desde `titles` y `userbase` y cargo `1837` fechas unicas en `dim_tiempo` |
+| `05_ETL_DIM_PAIS.hpl`              | Validado  | Debe resolver paises multiples por fila                                             |
+| `06_ETL_DIM_CONTENIDO.hpl`         | Pendiente | No documentado aun                                                                  |
+| `07_ETL_FACT_INGRESOS.hpl`         | Pendiente | No documentado aun                                                                  |
+| `08_ETL_FACT_CONSUMO.hpl`          | Pendiente | Requiere logica simulada/controlada                                                 |
+| `00_RUN_ETL_COMPLETO.hwf`          | Pendiente | Workflow final                                                                      |
 
 Notas verificadas:
 
@@ -121,6 +121,5 @@ No existe una relacion natural directa entre `NetFlix.csv` y `Netflix Userbase.c
 
 ## 8. Proximo paso recomendado
 
-1. Construir `05_ETL_DIM_PAIS.hpl` resolviendo paises multiples.
-2. Continuar con `06_ETL_DIM_CONTENIDO.hpl`.
-3. Cerrar dimensiones antes de pasar a hechos y workflow final.
+1. Construir `06_ETL_DIM_PAIS.hpl` 
+2. Cerrar dimensiones antes de pasar a hechos y workflow final.
