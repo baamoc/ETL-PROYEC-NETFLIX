@@ -51,7 +51,7 @@ Primera ronda:
 - `02_ETL_DIM_SUSCRIPCION.hpl` -> validado
 - `03_ETL_DIM_USUARIO.hpl` -> validado
 - `04_ETL_DIM_TIEMPO.hpl` -> validado
-- `05_ETL_DIM_PAIS.hpl` -> pendiente
+- `05_ETL_DIM_PAIS.hpl` -> validado
 
 Segunda ronda:
 

@@ -22,6 +22,7 @@
 - [2026-05-22 - ETL Dim Suscripcion](seguimiento/registros/2026-05-22-etl-dim-suscripcion.md)
 - [2026-05-23 - ETL Dim Usuario](seguimiento/registros/2026-05-23-etl-dim-usuario.md)
 - [2026-05-24 - ETL Dim Tiempo](seguimiento/registros/2026-05-24-etl-dim-tiempo.md)
+- [2026-05-24 - ETL Dim Pais](seguimiento/registros/2026-05-24-etl-dim-pais.md)
 
 ## Referencias
 
