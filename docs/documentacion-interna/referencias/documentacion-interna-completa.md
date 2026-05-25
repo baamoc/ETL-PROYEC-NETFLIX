@@ -36,7 +36,7 @@ Regla clave: DBeaver sirve para validar y consultar. La carga al modelo final se
 | Base compartida | Neon operativa |
 | `stg_netflix_titles` | `7787` registros |
 | `stg_netflix_userbase` | `2500` registros |
-| ETL validadas | `01`, `02`, `03`, `04` |
+| ETL validadas | `01`, `02`, `03`, `04`, `05`, `06`, `07`, `08` |
 
 ## 3. Fuentes y tablas base
 
@@ -77,9 +77,9 @@ Hechos:
 | `03_ETL_DIM_USUARIO.hpl`           | Validado  | Carga `2500` usuarios a `dim_usuario`                                               |
 | `04_ETL_DIM_TIEMPO.hpl`            | Validado  | Lee fechas desde `titles` y `userbase` y cargo `1837` fechas unicas en `dim_tiempo` |
 | `05_ETL_DIM_PAIS.hpl`              | Validado  | Carga 117 paises unicos separando paises multiples                                             |
-| `06_ETL_DIM_CONTENIDO.hpl`         | Pendiente | No documentado aun                                                                  |
-| `07_ETL_FACT_INGRESOS.hpl`         | Pendiente | No documentado aun                                                                  |
-| `08_ETL_FACT_CONSUMO.hpl`          | Pendiente | Requiere logica simulada/controlada                                                 |
+| `06_ETL_DIM_CONTENIDO.hpl`         | Validado  | Lee titulos desde `staging` y carga `7787` contenidos en `dim_contenido`            |
+| `07_ETL_FACT_INGRESOS.hpl`         | Validado  | Carga `2500` hechos en `fact_ingresos` con total `31271.00` y sin duplicados       |
+| `08_ETL_FACT_CONSUMO.hpl`          | Validado  | Carga `2500` consumos simulados con `7500` visualizaciones y sin duplicados        |
 | `00_RUN_ETL_COMPLETO.hwf`          | Pendiente | Workflow final                                                                      |
 
 Notas verificadas:
@@ -87,6 +87,10 @@ Notas verificadas:
 - `02_ETL_DIM_SUSCRIPCION.hpl` tiene validacion documentada con `3` registros finales.
 - `03_ETL_DIM_USUARIO.hpl` tiene validacion documentada con `2500` registros finales.
 - `04_ETL_DIM_TIEMPO.hpl` quedo validado con `1837` filas, `1837` fechas unicas y sin nulos en los campos principales.
+- `05_ETL_DIM_PAIS.hpl` quedo validado con `117` paises unicos, sin duplicados ni vacios.
+- `06_ETL_DIM_CONTENIDO.hpl` quedo validado con `7787` filas, `7787` IDs unicos, `0` duplicados y `0` faltantes respecto a `staging.stg_netflix_titles`.
+- `07_ETL_FACT_INGRESOS.hpl` quedo validado con `2500` filas, `2500` combinaciones unicas, `0` nulos en claves, `0` usuarios sin match y un ingreso total de `31271.00`.
+- `08_ETL_FACT_CONSUMO.hpl` quedo validado con `2500` filas, `2500` combinaciones unicas, `0` nulos en claves, `0` duplicados y `7500` visualizaciones totales bajo una logica simulada/controlada.
 
 ## 5. Estado documental actual
 
@@ -117,9 +121,10 @@ El campo `country` puede traer multiples paises en una sola celda. Antes de carg
 
 ### fact_consumo
 
-No existe una relacion natural directa entre `NetFlix.csv` y `Netflix Userbase.csv`. La tabla `fact_consumo` necesitara una logica simulada o controlada y eso debe quedar documentado.
+No existe una relacion natural directa entre `NetFlix.csv` y `Netflix Userbase.csv`. La tabla `fact_consumo` se resolvio con una logica simulada/controlada y esa decision debe mantenerse documentada si se modifica el pipeline.
 
 ## 8. Proximo paso recomendado
 
-1. Construir `06_ETL_DIM_CONTENIDO.hpl`.
-2. Cerrar dimensiones antes de pasar a hechos y workflow final.
+1. Construir y validar `00_RUN_ETL_COMPLETO.hwf`.
+2. Mantener la validacion documental de cada hecho antes del workflow final.
+3. Si se ajusta `fact_consumo`, conservar explicada la logica simulada/controlada.

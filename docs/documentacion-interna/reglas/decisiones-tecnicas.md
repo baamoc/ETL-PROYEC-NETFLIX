@@ -62,7 +62,7 @@ Ejemplos esperados:
 
 Los datasets `NetFlix.csv` y `Netflix Userbase.csv` no tienen una relacion natural directa.
 
-Por eso `fact_consumo` debe construirse con una logica simulada o controlada y siempre documentada. No se debe inventar una relacion sin explicacion ni evidencia.
+Por eso `fact_consumo` se construye con una logica simulada o controlada y siempre documentada. La regla aplicada en el estado validado actual es `1 usuario = 1 consumo simulado`, con asignacion controlada de contenido y cantidad de visualizaciones generada de forma reproducible. No se debe inventar una relacion sin explicacion ni evidencia.
 
 ### dim_pais
 

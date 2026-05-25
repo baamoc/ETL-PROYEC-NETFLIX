@@ -23,6 +23,9 @@
 - [2026-05-23 - ETL Dim Usuario](seguimiento/registros/2026-05-23-etl-dim-usuario.md)
 - [2026-05-24 - ETL Dim Tiempo](seguimiento/registros/2026-05-24-etl-dim-tiempo.md)
 - [2026-05-24 - ETL Dim Pais](seguimiento/registros/2026-05-24-etl-dim-pais.md)
+- [2026-05-25 - ETL Dim Contenido](seguimiento/registros/2026-05-25-etl-dim-contenido.md)
+- [2026-05-25 - ETL Fact Ingresos](seguimiento/registros/2026-05-25-etl-fact-ingresos.md)
+- [2026-05-25 - ETL Fact Consumo](seguimiento/registros/2026-05-25-etl-fact-consumo.md)
 
 ## Referencias
 

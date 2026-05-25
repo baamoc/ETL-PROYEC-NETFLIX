@@ -88,16 +88,6 @@ Resultado: 3
 - dim_dispositivo: OK
 - dim_suscripcion: OK
 
-Pendiente:
-
-- 03_ETL_DIM_USUARIO.hpl
-- 04_ETL_DIM_TIEMPO.hpl
-- 05_ETL_DIM_PAIS.hpl
-- 06_ETL_DIM_CONTENIDO.hpl
-- 07_ETL_FACT_INGRESOS.hpl
-- 08_ETL_FACT_CONSUMO.hpl
-- 00_RUN_ETL_COMPLETO.hwf
-
 ## Reglas para continuar
 
 - Trabajar contra Neon.

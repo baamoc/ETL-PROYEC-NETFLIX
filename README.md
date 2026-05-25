@@ -6,8 +6,8 @@ Proyecto de Base de Datos 3 orientado al diseno e implementacion de un Data Ware
 
 - `staging.stg_netflix_titles` cargada y validada con `7787` registros.
 - `staging.stg_netflix_userbase` cargada y validada con `2500` registros.
-- ETL completadas y validadas: `01_ETL_DIM_DISPOSITIVO.hpl`, `02_ETL_DIM_SUSCRIPCION.hpl`, `03_ETL_DIM_USUARIO.hpl`, `04_ETL_DIM_TIEMPO.hpl`.
-- Pendientes funcionales: `05_ETL_DIM_PAIS.hpl`, `06_ETL_DIM_CONTENIDO.hpl`, `07_ETL_FACT_INGRESOS.hpl`, `08_ETL_FACT_CONSUMO.hpl`, `00_RUN_ETL_COMPLETO.hwf`.
+- ETL completadas y validadas: `01_ETL_DIM_DISPOSITIVO.hpl`, `02_ETL_DIM_SUSCRIPCION.hpl`, `03_ETL_DIM_USUARIO.hpl`, `04_ETL_DIM_TIEMPO.hpl`, `05_ETL_DIM_PAIS.hpl`, `06_ETL_DIM_CONTENIDO.hpl`, `07_ETL_FACT_INGRESOS.hpl`, `08_ETL_FACT_CONSUMO.hpl`.
+- Pendientes funcionales: `00_RUN_ETL_COMPLETO.hwf`.
 
 ## Objetivo
 
@@ -77,9 +77,9 @@ Tablas de hechos actuales:
 | `03_ETL_DIM_USUARIO.hpl` | Validado | Resultado final de `2500` usuarios |
 | `04_ETL_DIM_TIEMPO.hpl` | Validado | Carga `1837` fechas unicas en `dm_streaming.dim_tiempo` |
 | `05_ETL_DIM_PAIS.hpl` | Validado | Carga `117` países únicos separando países múltiples |
-| `06_ETL_DIM_CONTENIDO.hpl` | Pendiente | No iniciado en esta documentacion |
-| `07_ETL_FACT_INGRESOS.hpl` | Pendiente | No iniciado en esta documentacion |
-| `08_ETL_FACT_CONSUMO.hpl` | Pendiente | Requiere logica simulada/controlada |
+| `06_ETL_DIM_CONTENIDO.hpl` | Validado | Carga `7787` contenidos en `dm_streaming.dim_contenido` sin duplicados |
+| `07_ETL_FACT_INGRESOS.hpl` | Validado | Carga `2500` hechos con ingreso total `31271.00` y sin duplicados |
+| `08_ETL_FACT_CONSUMO.hpl` | Validado | Carga `2500` consumos simulados con `7500` visualizaciones y sin duplicados |
 | `00_RUN_ETL_COMPLETO.hwf` | Pendiente | Orquestacion final |
 
 ## Documentacion util
@@ -103,10 +103,10 @@ Tablas de hechos actuales:
 ## Riesgos conocidos
 
 - `dim_pais` no puede cargarse directo desde `country` cuando hay multiples paises en una misma celda.
-- `fact_consumo` no tiene relacion natural directa entre los datasets y necesitara una logica controlada y documentada.
+- `fact_consumo` no tiene relacion natural directa entre los datasets; por eso se resolvio con una logica simulada/controlada y documentada.
 
 ## Proximo paso recomendado
 
-1. Construir `06_ETL_DIM_PAIS.hpl` 
-2. Dejar listo el bloque de dimensiones antes de pasar a hechos.
-3. Mantener la validacion documental al dia en `docs/documentacion-interna/seguimiento/registros/`.
+1. Construir y validar `00_RUN_ETL_COMPLETO.hwf`.
+2. Mantener la validacion documental al dia en `docs/documentacion-interna/seguimiento/registros/`.
+3. Si se ajusta `fact_consumo`, conservar documentada la logica simulada/controlada.

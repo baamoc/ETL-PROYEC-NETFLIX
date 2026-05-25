@@ -52,12 +52,12 @@ Primera ronda:
 - `03_ETL_DIM_USUARIO.hpl` -> validado
 - `04_ETL_DIM_TIEMPO.hpl` -> validado
 - `05_ETL_DIM_PAIS.hpl` -> validado
+- `06_ETL_DIM_CONTENIDO.hpl` -> validado
 
 Segunda ronda:
 
-- `06_ETL_DIM_CONTENIDO.hpl`
-- `07_ETL_FACT_INGRESOS.hpl`
-- `08_ETL_FACT_CONSUMO.hpl`
+- `07_ETL_FACT_INGRESOS.hpl` -> validado
+- `08_ETL_FACT_CONSUMO.hpl` -> validado
 - `00_RUN_ETL_COMPLETO.hwf`
 
 ## 5. Flujo visual recomendado en dimensiones
