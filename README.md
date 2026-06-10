@@ -1,112 +1,102 @@
-# DW Netflix - Data Warehouse Streaming
+# Proyecto Data Warehouse Netflix — BD3
 
-Proyecto de Base de Datos 3 orientado al diseno e implementacion de un Data Warehouse para analizar usuarios, contenido, suscripciones, dispositivos, tiempo e ingresos en una plataforma de streaming tipo Netflix.
+**Herramienta ETL**: Apache Hop  
+**Base de datos**: PostgreSQL (Neon serverless) — conexión `Proyecto-Neonbd`  
+**Esquemas**: `staging` (datos crudos) · `dm_streaming` (Data Mart final)
 
-## Estado actual
+---
 
-- `staging.stg_netflix_titles` cargada y validada con `7787` registros.
-- `staging.stg_netflix_userbase` cargada y validada con `2500` registros.
-- ETL completadas y validadas: `01_ETL_DIM_DISPOSITIVO.hpl`, `02_ETL_DIM_SUSCRIPCION.hpl`, `03_ETL_DIM_USUARIO.hpl`, `04_ETL_DIM_TIEMPO.hpl`, `05_ETL_DIM_PAIS.hpl`, `06_ETL_DIM_CONTENIDO.hpl`, `07_ETL_FACT_INGRESOS.hpl`, `08_ETL_FACT_CONSUMO.hpl`.
-- Pendientes funcionales: `00_RUN_ETL_COMPLETO.hwf`.
+## Estado del proyecto
 
-## Objetivo
+| Punto | Descripción | Estado |
+|-------|-------------|--------|
+| 1–5 | Modelo de datos, consigna, diseño del DW | ✅ Completo (Presentación 1) |
+| 6 | Pipelines ETL + Workflow maestro | ✅ Completo (Presentación 2) |
+| 7–10 | Pendientes | 🔲 |
 
-Construir un Data Warehouse reproducible y documentado que permita responder preguntas como estas:
+---
 
-- distribucion de usuarios por edad, genero y pais
-- ingresos por tipo de suscripcion
-- uso de dispositivos
-- evolucion temporal del contenido y de los ingresos
-- analisis posterior de hechos de consumo e ingresos
+## Estructura del repositorio
 
-## Arquitectura de datos
-
-```text
-CSV Kaggle
-   -> staging
-   -> Apache Hop ETL
-   -> dm_streaming
-   -> Consultas OLAP / Reportes / Dashboard
+```
+├── datasets/                    # Fuentes de datos originales
+│   ├── NetFlix.csv              # Títulos Netflix (~8000 registros)
+│   └── Netflix Userbase.csv    # Usuarios (~2500 registros)
+│
+├── pipelines/                   # Pipelines Apache Hop (.hpl)
+│   ├── UTIL_TRUNCATE_DM.hpl    # Trunca todas las tablas del DM
+│   ├── 01_ETL_DIM_SUSCRIPCION.hpl
+│   ├── 02_ETL_DIM_USUARIO.hpl
+│   ├── 03_ETL_DIM_PAIS.hpl
+│   ├── 04_ETL_DIM_TIEMPO.hpl
+│   ├── 05_ETL_DIM_DISPOSITIVO.hpl
+│   ├── 06_ETL_DIM_CONTENIDO.hpl
+│   ├── 07_ETL_FACT_INGRESOS.hpl
+│   └── 08_ETL_FACT_CONSUMO.hpl
+│
+├── workflows/
+│   └── WF_MASTER_ETL.hwf       # Workflow maestro — ejecuta todo en orden
+│
+├── docs/
+│   ├── etl/                    # Documentación técnica del ETL (punto 6)
+│   │   ├── 00_RESUMEN_GENERAL.md
+│   │   ├── UTIL_TRUNCATE_DM.md
+│   │   ├── 01_ETL_DIM_SUSCRIPCION.md
+│   │   ├── 02_ETL_DIM_USUARIO.md
+│   │   ├── 03_ETL_DIM_PAIS.md
+│   │   ├── 04_ETL_DIM_TIEMPO.md
+│   │   ├── 05_ETL_DIM_DISPOSITIVO.md
+│   │   ├── 06_ETL_DIM_CONTENIDO.md
+│   │   ├── 07_ETL_FACT_INGRESOS.md
+│   │   ├── 08_ETL_FACT_CONSUMO.md
+│   │   ├── WF_MASTER_ETL.md
+│   │   └── verificar_dm_streaming.sql  # Consultas de verificación
+│   ├── modelos/                # Modelo de referencia del DW
+│   └── Imagenes-Referencia/    # Imágenes de referencia del licenciado
+│
+└── metadata/                   # Configuración Apache Hop
 ```
 
-## Herramientas oficiales
+---
 
-| Area | Herramienta | Uso |
-| --- | --- | --- |
-| Base de datos | PostgreSQL | Motor principal del DW |
-| Base compartida | Neon PostgreSQL | Trabajo colaborativo |
-| Cliente SQL | DBeaver | Validacion y consultas |
-| ETL | Apache Hop | Carga y transformacion |
-| Versionado | Git / GitHub | Trabajo en equipo |
+## Data Mart — Tablas y registros
 
-Regla clave: DBeaver no se usa como herramienta ETL. Las cargas al modelo final se hacen con Apache Hop.
+| Tabla | Tipo | Registros | Descripción |
+|-------|------|-----------|-------------|
+| `dim_suscripcion` | Dimensión | 3 | Tipos de plan: Basic, Standard, Premium |
+| `dim_usuario` | Dimensión | 2500 | Usuarios con edad y país |
+| `dim_pais` | Dimensión | 10 | Países únicos normalizados |
+| `dim_tiempo` | Dimensión | 1822 | Fechas únicas con día, mes y año |
+| `dim_dispositivo` | Dimensión | 4 | Smartphone, Tablet, Smart TV, Laptop |
+| `dim_contenido` | Dimensión | 7787 | Títulos Netflix con tipo y año |
+| `fact_ingresos` | Hecho | 2500 | Un registro por usuario — ingreso mensual |
+| `fact_consumo` | Hecho | 5000 | Visualizaciones derivadas por coincidencia de país |
 
-## Estructura funcional actual
+---
 
-### staging
+## Cómo ejecutar el ETL
 
-- `staging.stg_netflix_titles`
-  Campos principales: `show_id`, `type`, `title`, `director`, `cast_members`, `country`, `date_added`, `release_year`, `rating`, `duration`, `genres`, `description`.
-- `staging.stg_netflix_userbase`
-  Campos principales: `"User ID"`, `"Subscription Type"`, `"Monthly Revenue"`, `"Join Date"`, `"Last Payment Date"`, `country`, `age`, `gender`, `device`, `"Plan Duration"`.
+1. Abrir Apache Hop
+2. Abrir `workflows/WF_MASTER_ETL.hwf`
+3. Presionar **Play**
 
-### dm_streaming
+El workflow ejecuta automáticamente los 9 pipelines en orden correcto.  
+Duración total aproximada: **~85 segundos**.
 
-Dimensiones actuales:
+---
 
-- `dim_usuario`
-- `dim_pais`
-- `dim_tiempo`
-- `dim_contenido`
-- `dim_suscripcion`
-- `dim_dispositivo`
+## Cómo verificar los datos
 
-Tablas de hechos actuales:
+Ejecutar `docs/etl/verificar_dm_streaming.sql` en la consola de Neon (neon.tech):
 
-- `fact_consumo`
-- `fact_ingresos`
+- **Sección 1**: conteo general de todas las tablas
+- **Sección 2**: muestra de datos por dimensión
+- **Sección 3**: muestra de hechos con JOINs a dimensiones
+- **Sección 4**: verificación de integridad referencial (debe devolver 0 en todo)
+- **Sección 5**: consultas de análisis de negocio
 
-## Estado ETL por pipeline
+---
 
-| Pipeline | Estado | Observacion |
-| --- | --- | --- |
-| `00_LOAD_STG_NETFLIX_TITLES.hpl` | Creado | Carga inicial a `staging.stg_netflix_titles` |
-| `00_LOAD_STG_NETFLIX_USERBASE.hpl` | Creado | Carga inicial a `staging.stg_netflix_userbase` |
-| `01_ETL_DIM_DISPOSITIVO.hpl` | Validado | Resultado final de 4 dispositivos unicos |
-| `02_ETL_DIM_SUSCRIPCION.hpl` | Validado | Resultado final de 3 tipos de suscripcion |
-| `03_ETL_DIM_USUARIO.hpl` | Validado | Resultado final de `2500` usuarios |
-| `04_ETL_DIM_TIEMPO.hpl` | Validado | Carga `1837` fechas unicas en `dm_streaming.dim_tiempo` |
-| `05_ETL_DIM_PAIS.hpl` | Validado | Carga `117` países únicos separando países múltiples |
-| `06_ETL_DIM_CONTENIDO.hpl` | Validado | Carga `7787` contenidos en `dm_streaming.dim_contenido` sin duplicados |
-| `07_ETL_FACT_INGRESOS.hpl` | Validado | Carga `2500` hechos con ingreso total `31271.00` y sin duplicados |
-| `08_ETL_FACT_CONSUMO.hpl` | Validado | Carga `2500` consumos simulados con `7500` visualizaciones y sin duplicados |
-| `00_RUN_ETL_COMPLETO.hwf` | Pendiente | Orquestacion final |
+## Documentación técnica
 
-## Documentacion util
-
-- `docs/documentacion-interna/indice.md` -> mapa rapido de la documentacion interna
-- `docs/documentacion-interna/guias/` -> uso del espacio documental y colaboracion
-- `docs/documentacion-interna/reglas/` -> reglas y decisiones del proyecto
-- `docs/documentacion-interna/seguimiento/` -> resumen operativo y registros por fecha
-- `docs/documentacion-interna/referencias/documentacion-interna-completa.md` -> referencia interna consolidada
-- `docs/informe-oficial/Netflix-Estructura-del-proyecto.md` -> informe base de la primera presentacion
-
-## Reglas operativas clave
-
-- no insertar manualmente en `dm_streaming`
-- todo pipeline debe partir de `staging`
-- `staging` puede conservar nombres crudos del CSV
-- `dm_streaming` debe usar nombres limpios y orientados al analisis
-- no modificar tablas finales sin aprobacion
-- las transformaciones de Hop deben tener nombres descriptivos
-
-## Riesgos conocidos
-
-- `dim_pais` no puede cargarse directo desde `country` cuando hay multiples paises en una misma celda.
-- `fact_consumo` no tiene relacion natural directa entre los datasets; por eso se resolvio con una logica simulada/controlada y documentada.
-
-## Proximo paso recomendado
-
-1. Construir y validar `00_RUN_ETL_COMPLETO.hwf`.
-2. Mantener la validacion documental al dia en `docs/documentacion-interna/seguimiento/registros/`.
-3. Si se ajusta `fact_consumo`, conservar documentada la logica simulada/controlada.
+Ver [`docs/etl/00_RESUMEN_GENERAL.md`](docs/etl/00_RESUMEN_GENERAL.md) como punto de entrada.

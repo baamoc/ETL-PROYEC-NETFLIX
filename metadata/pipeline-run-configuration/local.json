@@ -16,5 +16,7 @@
   "defaultSelection": true,
   "configurationVariables": [],
   "name": "local",
-  "description": "Runs your pipelines locally with the standard local Hop pipeline engine"
+  "description": "Runs your pipelines locally with the standard local Hop pipeline engine",
+  "executionInfoLocationName": "local_execution_information",
+  "dataProfile": "perfil_datos_run_configuration"
 }

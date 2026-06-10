@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline>
   <info>
-    <name>04_ETL_DIM_TIEMPO</name>
+    <name>03_ETL_DIM_PAIS</name>
     <name_sync_with_filename>Y</name_sync_with_filename>
-    <description>ETL dimension dim_tiempo; une fechas de userbase (DD-MM-YY) y titles (DD-Mon-YY)</description>
+    <description>ETL dimension dim_pais desde stg_netflix_userbase</description>
     <extended_description/>
     <pipeline_version/>
     <pipeline_type>Normal</pipeline_type>
@@ -21,55 +21,55 @@
   </notepads>
   <order>
     <hop>
-      <from>Leer_Todas_Fechas</from>
-      <to>Sel_Fecha_Raw</to>
+      <from>Leer_STG_Paises</from>
+      <to>Sel_Campos_Pais</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Sel_Fecha_Raw</from>
-      <to>Limpiar_Fecha</to>
+      <from>Sel_Campos_Pais</from>
+      <to>Limpiar_Textos_Pais</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Limpiar_Fecha</from>
-      <to>Corregir_Fecha</to>
+      <from>Limpiar_Textos_Pais</from>
+      <to>Corregir_Textos_Pais</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Corregir_Fecha</from>
-      <to>JS_Parsear_Fecha</to>
+      <from>Corregir_Textos_Pais</from>
+      <to>JS_Normalizar_Pais</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>JS_Parsear_Fecha</from>
+      <from>JS_Normalizar_Pais</from>
       <to>Sel_Campos_Final</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>Sel_Campos_Final</from>
-      <to>Ordenar_Fechas</to>
+      <to>Ordenar_Paises</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Ordenar_Fechas</from>
+      <from>Ordenar_Paises</from>
       <to>Eliminar_Duplicados</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>Eliminar_Duplicados</from>
-      <to>Validar_Fecha</to>
+      <to>Validar_Pais</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Validar_Fecha</from>
-      <to>Cargar_DIM_Tiempo</to>
+      <from>Validar_Pais</from>
+      <to>Cargar_DIM_Pais</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>Cargar_DIM_Tiempo</name>
+    <name>Cargar_DIM_Pais</name>
     <type>TableOutput</type>
-    <description>Carga masiva con truncate en dm_streaming.dim_tiempo; bulk insert mas rapido que InsertUpdate en Neon</description>
+    <description>Carga masiva con truncate en dm_streaming.dim_pais; bulk insert mas rapido que InsertUpdate en Neon</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -94,21 +94,21 @@
     <return_keys>N</return_keys>
     <schema>dm_streaming</schema>
     <specify_fields>N</specify_fields>
-    <table>dim_tiempo</table>
+    <table>dim_pais</table>
     <tablename_in_field>N</tablename_in_field>
     <tablename_in_table>N</tablename_in_table>
     <truncate>N</truncate>
     <use_batch>Y</use_batch>
     <attributes/>
     <GUI>
-      <xloc>832</xloc>
-      <yloc>368</yloc>
+      <xloc>1440</xloc>
+      <yloc>464</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Corregir_Fecha</name>
+    <name>Corregir_Textos_Pais</name>
     <type>ReplaceString</type>
-    <description>Reemplaza strings vacios en fecha_raw por Sin dato para identificarlos en el JS</description>
+    <description>Reemplaza strings vacios en country por Sin dato</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -119,7 +119,7 @@
     <fields>
       <field>
         <case_sensitive>Y</case_sensitive>
-        <in_stream_name>fecha_raw</in_stream_name>
+        <in_stream_name>country</in_stream_name>
         <is_unicode>N</is_unicode>
         <replace_by_string>Sin dato</replace_by_string>
         <replace_string>^\s*$</replace_string>
@@ -130,14 +130,14 @@
     </fields>
     <attributes/>
     <GUI>
-      <xloc>528</xloc>
-      <yloc>112</yloc>
+      <xloc>480</xloc>
+      <yloc>304</yloc>
     </GUI>
   </transform>
   <transform>
     <name>Eliminar_Duplicados</name>
     <type>Unique</type>
-    <description>Elimina fechas duplicadas; requiere stream ordenado por fecha_completa</description>
+    <description>Elimina paises duplicados por nombre_pais; requiere stream ordenado</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -149,20 +149,20 @@
     <fields>
       <field>
         <case_insensitive>N</case_insensitive>
-        <name>fecha_completa</name>
+        <name>nombre_pais</name>
       </field>
     </fields>
     <reject_duplicate_row>N</reject_duplicate_row>
     <attributes/>
     <GUI>
-      <xloc>512</xloc>
-      <yloc>368</yloc>
+      <xloc>1056</xloc>
+      <yloc>464</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>JS_Parsear_Fecha</name>
+    <name>JS_Normalizar_Pais</name>
     <type>ScriptValueMod</type>
-    <description>Detecta formato DD-MM-YY o DD-Mon-YY y parsea a fecha_completa (Date), dia, mes, anio (Integer)</description>
+    <description>Normaliza nombre de pais a formato titulo (proper case) palabra por palabra</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -176,80 +176,26 @@
         <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
         <jsScript_script>
-var months_map = {
-  'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
-  'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
-  'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
-};
-
-var fecha_completa = null;
-var dia = null;
-var mes = null;
-var anio = null;
-
-if (fecha_raw != null &amp;&amp; fecha_raw.trim() != '' &amp;&amp; fecha_raw.trim() != 'Sin dato') {
-  var parts = fecha_raw.trim().split('-');
-  if (parts.length == 3) {
-    var d = parseInt(parts[0], 10);
-    var m_raw = parts[1].trim();
-    var y_raw = parseInt(parts[2], 10);
-
-    var m;
-    if (isNaN(parseInt(m_raw, 10))) {
-      // DD-Mon-YY format (e.g. "14-Aug-20")
-      var cap = m_raw.charAt(0).toUpperCase() + m_raw.substring(1).toLowerCase();
-      m = months_map[cap] || null;
-    } else {
-      // DD-MM-YY format (e.g. "15-01-22")
-      m = parseInt(m_raw, 10);
-    }
-
-    // 2-digit year -> 20xx
-    var y = y_raw &lt; 100 ? 2000 + y_raw : y_raw;
-
-    if (!isNaN(d) &amp;&amp; m != null &amp;&amp; !isNaN(y) &amp;&amp; d >= 1 &amp;&amp; d &lt;= 31 &amp;&amp; m >= 1 &amp;&amp; m &lt;= 12) {
-      dia = d;
-      mes = m;
-      anio = y;
-      var cal = java.util.Calendar.getInstance();
-      cal.set(y, m - 1, d, 0, 0, 0);
-      cal.set(java.util.Calendar.MILLISECOND, 0);
-      fecha_completa = cal.getTime();
+// Proper case word by word to handle "United States", "United Kingdom", etc.
+var nombre_pais = 'Sin dato';
+if (country != null &amp;&amp; country.trim() != '' &amp;&amp; country.trim() != 'Sin dato') {
+  var words = country.trim().split(' ');
+  var result = [];
+  for (var i = 0; i &lt; words.length; i++) {
+    if (words[i].length > 0) {
+      result.push(words[i].charAt(0).toUpperCase() + words[i].substring(1).toLowerCase());
     }
   }
+  nombre_pais = result.join(' ');
 }
         </jsScript_script>
       </jsScript>
     </jsScripts>
     <fields>
       <field>
-        <name>fecha_completa</name>
-        <rename>fecha_completa</rename>
-        <type>Date</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>
-      <field>
-        <name>dia</name>
-        <rename>dia</rename>
-        <type>Integer</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>
-      <field>
-        <name>mes</name>
-        <rename>mes</rename>
-        <type>Integer</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>
-      <field>
-        <name>anio</name>
-        <rename>anio</rename>
-        <type>Integer</type>
+        <name>nombre_pais</name>
+        <rename>nombre_pais</rename>
+        <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
         <replace>N</replace>
@@ -257,14 +203,14 @@ if (fecha_raw != null &amp;&amp; fecha_raw.trim() != '' &amp;&amp; fecha_raw.tri
     </fields>
     <attributes/>
     <GUI>
-      <xloc>512</xloc>
-      <yloc>240</yloc>
+      <xloc>672</xloc>
+      <yloc>304</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Leer_Todas_Fechas</name>
+    <name>Leer_STG_Paises</name>
     <type>TableInput</type>
-    <description>Extrae todas las fechas en un solo stream: join_date y last_payment_date de userbase, date_added de titles</description>
+    <description>Extrae country desde staging sin transformaciones en SQL</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -275,28 +221,20 @@ if (fecha_raw != null &amp;&amp; fecha_raw.trim() != '' &amp;&amp; fecha_raw.tri
     <connection>Proyecto-Neonbd</connection>
     <execute_each_row>N</execute_each_row>
     <limit>0</limit>
-    <sql>SELECT join_date AS fecha_raw
+    <sql>SELECT country
 FROM staging.stg_netflix_userbase
-WHERE join_date IS NOT NULL
-UNION ALL
-SELECT last_payment_date AS fecha_raw
-FROM staging.stg_netflix_userbase
-WHERE last_payment_date IS NOT NULL
-UNION ALL
-SELECT date_added AS fecha_raw
-FROM staging.stg_netflix_titles
-WHERE date_added IS NOT NULL</sql>
+WHERE country IS NOT NULL</sql>
     <variables_active>N</variables_active>
     <attributes/>
     <GUI>
-      <xloc>240</xloc>
-      <yloc>224</yloc>
+      <xloc>96</xloc>
+      <yloc>208</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Limpiar_Fecha</name>
+    <name>Limpiar_Textos_Pais</name>
     <type>StringOperations</type>
-    <description>Aplica trim al string de fecha para eliminar espacios sobrantes</description>
+    <description>Aplica trim al campo country para eliminar espacios sobrantes</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -306,7 +244,7 @@ WHERE date_added IS NOT NULL</sql>
     </partitioning>
     <fields>
       <field>
-        <in_stream_name>fecha_raw</in_stream_name>
+        <in_stream_name>country</in_stream_name>
         <out_stream_name/>
         <trim_type>both</trim_type>
         <lower_upper>none</lower_upper>
@@ -321,14 +259,14 @@ WHERE date_added IS NOT NULL</sql>
     </fields>
     <attributes/>
     <GUI>
-      <xloc>400</xloc>
-      <yloc>240</yloc>
+      <xloc>480</xloc>
+      <yloc>208</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Ordenar_Fechas</name>
+    <name>Ordenar_Paises</name>
     <type>SortRows</type>
-    <description>Ordena por fecha_completa para habilitar la deduplicacion siguiente</description>
+    <description>Ordena por nombre_pais para habilitar la deduplicacion siguiente</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -343,7 +281,7 @@ WHERE date_added IS NOT NULL</sql>
         <case_sensitive>N</case_sensitive>
         <collator_enabled>N</collator_enabled>
         <collator_strength>0</collator_strength>
-        <name>fecha_completa</name>
+        <name>nombre_pais</name>
         <presorted>N</presorted>
       </field>
     </fields>
@@ -351,14 +289,14 @@ WHERE date_added IS NOT NULL</sql>
     <unique_rows>N</unique_rows>
     <attributes/>
     <GUI>
-      <xloc>688</xloc>
-      <yloc>240</yloc>
+      <xloc>1056</xloc>
+      <yloc>304</yloc>
     </GUI>
   </transform>
   <transform>
     <name>Sel_Campos_Final</name>
     <type>SelectValues</type>
-    <description>Conserva solo los campos del modelo DM generados por el JS</description>
+    <description>Conserva solo nombre_pais generado por el JS con nombre del modelo DM</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -369,40 +307,22 @@ WHERE date_added IS NOT NULL</sql>
     <fields>
       <field>
         <length>-2</length>
-        <name>fecha_completa</name>
+        <name>nombre_pais</name>
         <precision>-2</precision>
-        <rename>fecha_completa</rename>
-      </field>
-      <field>
-        <length>-2</length>
-        <name>dia</name>
-        <precision>-2</precision>
-        <rename>dia</rename>
-      </field>
-      <field>
-        <length>-2</length>
-        <name>mes</name>
-        <precision>-2</precision>
-        <rename>mes</rename>
-      </field>
-      <field>
-        <length>-2</length>
-        <name>anio</name>
-        <precision>-2</precision>
-        <rename>anio</rename>
+        <rename>nombre_pais</rename>
       </field>
       <select_unspecified>N</select_unspecified>
     </fields>
     <attributes/>
     <GUI>
-      <xloc>704</xloc>
-      <yloc>144</yloc>
+      <xloc>864</xloc>
+      <yloc>304</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Sel_Fecha_Raw</name>
+    <name>Sel_Campos_Pais</name>
     <type>SelectValues</type>
-    <description>Selecciona el campo fecha_raw del stream combinado</description>
+    <description>Selecciona el campo country para la dimension pais</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -413,22 +333,22 @@ WHERE date_added IS NOT NULL</sql>
     <fields>
       <field>
         <length>-2</length>
-        <name>fecha_raw</name>
+        <name>country</name>
         <precision>-2</precision>
-        <rename>fecha_raw</rename>
+        <rename>country</rename>
       </field>
       <select_unspecified>N</select_unspecified>
     </fields>
     <attributes/>
     <GUI>
-      <xloc>400</xloc>
-      <yloc>128</yloc>
+      <xloc>288</xloc>
+      <yloc>208</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>Validar_Fecha</name>
+    <name>Validar_Pais</name>
     <type>FilterRows</type>
-    <description>Descarta registros donde fecha_completa es nula por falla de parseo en el JS</description>
+    <description>Descarta registros donde nombre_pais quedo nulo tras la normalizacion JS</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -441,16 +361,16 @@ WHERE date_added IS NOT NULL</sql>
         <conditions>
 </conditions>
         <function>IS NOT NULL</function>
-        <leftvalue>fecha_completa</leftvalue>
+        <leftvalue>nombre_pais</leftvalue>
         <negated>N</negated>
         <operator>-</operator>
       </condition>
     </compare>
-    <send_true_to>Cargar_DIM_Tiempo</send_true_to>
+    <send_true_to>Cargar_DIM_Pais</send_true_to>
     <attributes/>
     <GUI>
-      <xloc>672</xloc>
-      <yloc>368</yloc>
+      <xloc>1248</xloc>
+      <yloc>464</yloc>
     </GUI>
   </transform>
   <transform_error_handling>

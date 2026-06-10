@@ -1,0 +1,15 @@
+{
+  "virtualPath": "",
+  "executionInfoLocation": {
+    "local-folder": {
+      "pluginName": "File location",
+      "pluginId": "local-folder",
+      "rootFolder": "${PROJECT_HOME}/execution-information",
+      "dataProfileSize": 100
+    }
+  },
+  "dataLoggingDelay": "2000",
+  "name": "local_execution_information",
+  "description": "",
+  "dataLoggingInterval": "5000"
+}

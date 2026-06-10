@@ -5,7 +5,9 @@
       "transactional": false
     }
   },
+  "virtualPath": "",
   "defaultSelection": true,
   "name": "local",
-  "description": "Runs your workflows locally with the standard local Hop workflow engine"
+  "description": "Runs your workflows locally with the standard local Hop workflow engine",
+  "executionInfoLocationName": "local_execution_information"
 }

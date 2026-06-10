@@ -1,0 +1,22 @@
+{
+  "virtualPath": "",
+  "name": "perfil_datos_run_configuration",
+  "description": "",
+  "sampler": [
+    {
+      "FirstRowsExecutionDataSampler": {
+        "sampleSize": "100"
+      }
+    },
+    {
+      "LastRowsExecutionDataSampler": {
+        "sampleSize": "100"
+      }
+    },
+    {
+      "RandomRowsExecutionDataSampler": {
+        "sampleSize": "100"
+      }
+    }
+  ]
+}

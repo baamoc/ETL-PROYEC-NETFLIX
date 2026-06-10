@@ -3,7 +3,7 @@
   <info>
     <name>07_ETL_FACT_INGRESOS</name>
     <name_sync_with_filename>Y</name_sync_with_filename>
-    <description/>
+    <description>ETL fact_ingresos: une userbase con 4 dimensiones via StreamLookup para cargar ingresos mensuales por usuario</description>
     <extended_description/>
     <pipeline_version/>
     <pipeline_type>Normal</pipeline_type>
@@ -13,33 +13,98 @@
     <transform_performance_capturing_delay>1000</transform_performance_capturing_delay>
     <transform_performance_capturing_size_limit>100</transform_performance_capturing_size_limit>
     <created_user>-</created_user>
-    <created_date>2026/05/25 11:54:07.264</created_date>
+    <created_date>2026/06/10 00:00:00.000</created_date>
     <modified_user>-</modified_user>
-    <modified_date>2026/05/25 11:54:07.264</modified_date>
+    <modified_date>2026/06/10 00:00:00.000</modified_date>
   </info>
   <notepads>
   </notepads>
   <order>
     <hop>
-      <from>LEER_INGRESOS_DESDE_STAGING_CON_DIMENSIONES</from>
-      <to>SELECCIONAR_CAMPOS_FACT_INGRESOS</to>
+      <from>Leer_STG_Ingresos</from>
+      <to>Sel_Campos_Ingresos</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>SELECCIONAR_CAMPOS_FACT_INGRESOS</from>
-      <to>VALIDAR_CLAVES_FACT_INGRESOS</to>
+      <from>Sel_Campos_Ingresos</from>
+      <to>Limpiar_Textos_Ingresos</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>VALIDAR_CLAVES_FACT_INGRESOS</from>
-      <to>CARGAR_FACT_INGRESOS</to>
+      <from>Limpiar_Textos_Ingresos</from>
+      <to>Corregir_Textos_Ingresos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Corregir_Textos_Ingresos</from>
+      <to>JS_Preparar_Ingresos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>JS_Preparar_Ingresos</from>
+      <to>Sel_Campos_Preparados</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Sel_Campos_Preparados</from>
+      <to>Filtrar_Registros_Validos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filtrar_Registros_Validos</from>
+      <to>SL_Buscar_id_suscripcion</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Suscripcion</from>
+      <to>SL_Buscar_id_suscripcion</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Buscar_id_suscripcion</from>
+      <to>SL_Buscar_id_dispositivo</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Dispositivo</from>
+      <to>SL_Buscar_id_dispositivo</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Buscar_id_dispositivo</from>
+      <to>SL_Buscar_id_pais</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Pais</from>
+      <to>SL_Buscar_id_pais</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Buscar_id_pais</from>
+      <to>SL_Buscar_id_tiempo</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Tiempo_Ingresos</from>
+      <to>SL_Buscar_id_tiempo</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Buscar_id_tiempo</from>
+      <to>Sel_Campos_Final</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Sel_Campos_Final</from>
+      <to>Cargar_FACT_Ingresos</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>LEER_INGRESOS_DESDE_STAGING_CON_DIMENSIONES</name>
-    <type>TableInput</type>
-    <description/>
+    <name>Cargar_FACT_Ingresos</name>
+    <type>TableOutput</type>
+    <description>Carga masiva en fact_ingresos; truncate previo via UTIL_TRUNCATE_DM garantiza tabla limpia antes de cada carga</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -48,38 +113,26 @@
       <schema_name/>
     </partitioning>
     <connection>Proyecto-Neonbd</connection>
-    <execute_each_row>N</execute_each_row>
-    <limit>0</limit>
-    <sql>SELECT
-    u.id_usuario,
-    s.id_suscripcion,
-    d.id_dispositivo,
-    p.id_pais,
-    t.id_tiempo,
-    ub."Monthly Revenue"::numeric AS ingreso_mensual
-FROM staging.stg_netflix_userbase ub
-LEFT JOIN dm_streaming.dim_usuario u
-    ON u.id_usuario = ub."User ID"::integer
-LEFT JOIN dm_streaming.dim_suscripcion s
-    ON s.tipo_suscripcion = TRIM(ub."Subscription Type")
-   AND s.duracion_plan = TRIM(ub."Plan Duration")
-LEFT JOIN dm_streaming.dim_dispositivo d
-    ON d.nombre_dispositivo = TRIM(ub.device)
-LEFT JOIN dm_streaming.dim_pais p
-    ON p.nombre_pais = TRIM(ub.country)
-LEFT JOIN dm_streaming.dim_tiempo t
-    ON t.fecha_completa = ub."Last Payment Date"::date;</sql>
-    <variables_active>N</variables_active>
+    <schema>dm_streaming</schema>
+    <table>fact_ingresos</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>N</specify_fields>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <fields/>
     <attributes/>
     <GUI>
-      <xloc>224</xloc>
-      <yloc>80</yloc>
+      <xloc>2304</xloc>
+      <yloc>688</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>SELECCIONAR_CAMPOS_FACT_INGRESOS</name>
-    <type>SelectValues</type>
-    <description/>
+    <name>Corregir_Textos_Ingresos</name>
+    <type>ReplaceString</type>
+    <description>Reemplaza strings vacios en subscription_type, device y country por Sin dato</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -89,53 +142,46 @@ LEFT JOIN dm_streaming.dim_tiempo t
     </partitioning>
     <fields>
       <field>
-        <length>-2</length>
-        <name>id_usuario</name>
-        <precision>-2</precision>
-        <rename/>
+        <case_sensitive>Y</case_sensitive>
+        <in_stream_name>subscription_type</in_stream_name>
+        <is_unicode>N</is_unicode>
+        <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
+        <set_empty_string>N</set_empty_string>
+        <use_regex>Y</use_regex>
+        <whole_word>N</whole_word>
       </field>
       <field>
-        <length>-2</length>
-        <name>id_suscripcion</name>
-        <precision>-2</precision>
-        <rename/>
+        <case_sensitive>Y</case_sensitive>
+        <in_stream_name>device</in_stream_name>
+        <is_unicode>N</is_unicode>
+        <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
+        <set_empty_string>N</set_empty_string>
+        <use_regex>Y</use_regex>
+        <whole_word>N</whole_word>
       </field>
       <field>
-        <length>-2</length>
-        <name>id_dispositivo</name>
-        <precision>-2</precision>
-        <rename/>
+        <case_sensitive>Y</case_sensitive>
+        <in_stream_name>country</in_stream_name>
+        <is_unicode>N</is_unicode>
+        <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
+        <set_empty_string>N</set_empty_string>
+        <use_regex>Y</use_regex>
+        <whole_word>N</whole_word>
       </field>
-      <field>
-        <length>-2</length>
-        <name>id_pais</name>
-        <precision>-2</precision>
-        <rename/>
-      </field>
-      <field>
-        <length>-2</length>
-        <name>id_tiempo</name>
-        <precision>-2</precision>
-        <rename/>
-      </field>
-      <field>
-        <length>-2</length>
-        <name>ingreso_mensual</name>
-        <precision>-2</precision>
-        <rename/>
-      </field>
-      <select_unspecified>N</select_unspecified>
     </fields>
     <attributes/>
     <GUI>
-      <xloc>224</xloc>
-      <yloc>176</yloc>
+      <xloc>848</xloc>
+      <yloc>672</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>VALIDAR_CLAVES_FACT_INGRESOS</name>
+    <name>Filtrar_Registros_Validos</name>
     <type>FilterRows</type>
-    <description/>
+    <description>Descarta registros donde id_usuario o fecha_pago son nulos; sin ellos no hay FK valida para el hecho</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -153,37 +199,12 @@ LEFT JOIN dm_streaming.dim_tiempo t
             <leftvalue>id_usuario</leftvalue>
             <negated>N</negated>
             <operator>-</operator>
-            <rightvalue>id_suscripcion</rightvalue>
           </condition>
           <condition>
             <conditions>
 </conditions>
             <function>IS NOT NULL</function>
-            <leftvalue>id_suscripcion</leftvalue>
-            <negated>N</negated>
-            <operator>AND</operator>
-          </condition>
-          <condition>
-            <conditions>
-</conditions>
-            <function>IS NOT NULL</function>
-            <leftvalue>id_dispositivo</leftvalue>
-            <negated>N</negated>
-            <operator>AND</operator>
-          </condition>
-          <condition>
-            <conditions>
-</conditions>
-            <function>IS NOT NULL</function>
-            <leftvalue>id_pais</leftvalue>
-            <negated>N</negated>
-            <operator>AND</operator>
-          </condition>
-          <condition>
-            <conditions>
-</conditions>
-            <function>IS NOT NULL</function>
-            <leftvalue>id_tiempo</leftvalue>
+            <leftvalue>fecha_pago</leftvalue>
             <negated>N</negated>
             <operator>AND</operator>
           </condition>
@@ -196,24 +217,22 @@ LEFT JOIN dm_streaming.dim_tiempo t
             <operator>AND</operator>
           </condition>
         </conditions>
-        <function>IS NOT NULL</function>
-        <leftvalue>id_usuario</leftvalue>
+        <function>=</function>
         <negated>N</negated>
         <operator>-</operator>
-        <rightvalue>id_suscripcion</rightvalue>
       </condition>
     </compare>
-    <send_true_to>CARGAR_FACT_INGRESOS</send_true_to>
+    <send_true_to>SL_Buscar_id_suscripcion</send_true_to>
     <attributes/>
     <GUI>
-      <xloc>224</xloc>
-      <yloc>256</yloc>
+      <xloc>1344</xloc>
+      <yloc>400</yloc>
     </GUI>
   </transform>
   <transform>
-    <name>CARGAR_FACT_INGRESOS</name>
-    <type>InsertUpdate</type>
-    <description/>
+    <name>JS_Preparar_Ingresos</name>
+    <type>ScriptValueMod</type>
+    <description>Convierte user_id a Integer, normaliza strings a proper case y parsea last_payment_date a Date e ingreso_mensual a Number</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -221,77 +240,650 @@ LEFT JOIN dm_streaming.dim_tiempo t
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <commit>100</commit>
-    <connection>Proyecto-Neonbd</connection>
-    <lookup>
-      <key>
-        <condition>=</condition>
-        <field>id_usuario</field>
-        <name>id_usuario</name>
-        <name2/>
-      </key>
-      <key>
-        <condition>=</condition>
-        <field>id_suscripcion</field>
-        <name>id_suscripcion</name>
-        <name2/>
-      </key>
-      <key>
-        <condition>=</condition>
-        <field>id_dispositivo</field>
-        <name>id_dispositivo</name>
-        <name2/>
-      </key>
-      <key>
-        <condition>=</condition>
-        <field>id_pais</field>
-        <name>id_pais</name>
-        <name2/>
-      </key>
-      <key>
-        <condition>=</condition>
-        <field>id_tiempo</field>
-        <name>id_tiempo</name>
-        <name2/>
-      </key>
-      <schema>dm_streaming</schema>
-      <table>fact_ingresos</table>
-      <value>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+// Convert user_id String to Integer
+var id_usuario = null;
+if (user_id != null &amp;&amp; user_id.trim() != '') {
+  var parsedId = parseInt(user_id.trim(), 10);
+  if (!isNaN(parsedId) &amp;&amp; parsedId > 0) {
+    id_usuario = parsedId;
+  }
+}
+
+// Normalize subscription_type to proper case (Basic, Standard, Premium)
+var tipo_suscripcion_norm = 'Sin dato';
+if (subscription_type != null &amp;&amp; subscription_type.trim() != '' &amp;&amp; subscription_type.trim() != 'Sin dato') {
+  var st = subscription_type.trim();
+  tipo_suscripcion_norm = st.charAt(0).toUpperCase() + st.substring(1).toLowerCase();
+}
+
+// Normalize device to proper case word by word (Smart Tv, Laptop, Tablet, Smartphone)
+var nombre_dispositivo_norm = 'Sin dato';
+if (device != null &amp;&amp; device.trim() != '' &amp;&amp; device.trim() != 'Sin dato') {
+  var dWords = device.trim().split(' ');
+  var dResult = [];
+  for (var i = 0; i &lt; dWords.length; i++) {
+    if (dWords[i].length > 0) {
+      dResult.push(dWords[i].charAt(0).toUpperCase() + dWords[i].substring(1).toLowerCase());
+    }
+  }
+  nombre_dispositivo_norm = dResult.join(' ');
+}
+
+// Normalize country to proper case word by word (United States, United Kingdom, etc.)
+var nombre_pais_norm = 'Sin dato';
+if (country != null &amp;&amp; country.trim() != '' &amp;&amp; country.trim() != 'Sin dato') {
+  var cWords = country.trim().split(' ');
+  var cResult = [];
+  for (var i = 0; i &lt; cWords.length; i++) {
+    if (cWords[i].length > 0) {
+      cResult.push(cWords[i].charAt(0).toUpperCase() + cWords[i].substring(1).toLowerCase());
+    }
+  }
+  nombre_pais_norm = cResult.join(' ');
+}
+
+// Parse last_payment_date DD-MM-YY to Date
+var fecha_pago = null;
+if (last_payment_date != null &amp;&amp; last_payment_date.trim() != '' &amp;&amp; last_payment_date.trim() != 'Sin dato') {
+  var parts = last_payment_date.trim().split('-');
+  if (parts.length == 3) {
+    var d = parseInt(parts[0], 10);
+    var m = parseInt(parts[1], 10);
+    var y_raw = parseInt(parts[2], 10);
+    var y = y_raw &lt; 100 ? 2000 + y_raw : y_raw;
+    if (!isNaN(d) &amp;&amp; !isNaN(m) &amp;&amp; !isNaN(y) &amp;&amp; d >= 1 &amp;&amp; d &lt;= 31 &amp;&amp; m >= 1 &amp;&amp; m &lt;= 12) {
+      var cal = java.util.Calendar.getInstance();
+      cal.set(y, m - 1, d, 0, 0, 0);
+      cal.set(java.util.Calendar.MILLISECOND, 0);
+      fecha_pago = cal.getTime();
+    }
+  }
+}
+
+// Parse monthly_revenue to Number
+var ingreso_mensual = null;
+if (monthly_revenue != null &amp;&amp; monthly_revenue.trim() != '') {
+  var parsedRev = parseFloat(monthly_revenue.trim());
+  if (!isNaN(parsedRev) &amp;&amp; parsedRev >= 0) {
+    ingreso_mensual = parsedRev;
+  }
+}
+        </jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field>
         <name>id_usuario</name>
         <rename>id_usuario</rename>
-        <update>N</update>
-      </value>
-      <value>
-        <name>id_suscripcion</name>
-        <rename>id_suscripcion</rename>
-        <update>N</update>
-      </value>
+        <type>Integer</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>tipo_suscripcion_norm</name>
+        <rename>tipo_suscripcion_norm</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>nombre_dispositivo_norm</name>
+        <rename>nombre_dispositivo_norm</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>nombre_pais_norm</name>
+        <rename>nombre_pais_norm</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>fecha_pago</name>
+        <rename>fecha_pago</rename>
+        <type>Date</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>ingreso_mensual</name>
+        <rename>ingreso_mensual</rename>
+        <type>Number</type>
+        <length>10</length>
+        <precision>2</precision>
+        <replace>N</replace>
+      </field>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>1040</xloc>
+      <yloc>672</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Leer_DIM_Dispositivo</name>
+    <type>TableInput</type>
+    <description>Lee dim_dispositivo completa para alimentar el StreamLookup de id_dispositivo</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_dispositivo, nombre_dispositivo FROM dm_streaming.dim_dispositivo</sql>
+    <variables_active>N</variables_active>
+    <attributes/>
+    <GUI>
+      <xloc>1680</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Leer_DIM_Pais</name>
+    <type>TableInput</type>
+    <description>Lee dim_pais completa para alimentar el StreamLookup de id_pais</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_pais, nombre_pais FROM dm_streaming.dim_pais</sql>
+    <variables_active>N</variables_active>
+    <attributes/>
+    <GUI>
+      <xloc>1872</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Leer_DIM_Suscripcion</name>
+    <type>TableInput</type>
+    <description>Lee dim_suscripcion completa para alimentar el StreamLookup de id_suscripcion</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_suscripcion, tipo_suscripcion FROM dm_streaming.dim_suscripcion</sql>
+    <variables_active>N</variables_active>
+    <attributes/>
+    <GUI>
+      <xloc>1488</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Leer_DIM_Tiempo_Ingresos</name>
+    <type>TableInput</type>
+    <description>Lee dim_tiempo completa para alimentar el StreamLookup de id_tiempo por fecha de pago</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_tiempo, fecha_completa FROM dm_streaming.dim_tiempo</sql>
+    <variables_active>N</variables_active>
+    <attributes/>
+    <GUI>
+      <xloc>2064</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Leer_STG_Ingresos</name>
+    <type>TableInput</type>
+    <description>Extrae campos de userbase necesarios para fact_ingresos sin transformaciones en SQL</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT user_id, subscription_type, device, country, last_payment_date, monthly_revenue
+FROM staging.stg_netflix_userbase
+WHERE user_id IS NOT NULL</sql>
+    <variables_active>N</variables_active>
+    <attributes/>
+    <GUI>
+      <xloc>464</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Limpiar_Textos_Ingresos</name>
+    <type>StringOperations</type>
+    <description>Aplica trim a todos los campos string para eliminar espacios sobrantes</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>user_id</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>subscription_type</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>device</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>country</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>last_payment_date</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>monthly_revenue</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>848</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Buscar_id_dispositivo</name>
+    <type>StreamLookup</type>
+    <description>Busca id_dispositivo en dim_dispositivo por nombre_dispositivo normalizado</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Dispositivo</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>nombre_dispositivo_norm</name>
+        <field>nombre_dispositivo</field>
+      </key>
       <value>
         <name>id_dispositivo</name>
         <rename>id_dispositivo</rename>
-        <update>N</update>
+        <default/>
+        <type>Integer</type>
       </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>1536</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Buscar_id_pais</name>
+    <type>StreamLookup</type>
+    <description>Busca id_pais en dim_pais por nombre_pais normalizado</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Pais</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>nombre_pais_norm</name>
+        <field>nombre_pais</field>
+      </key>
       <value>
         <name>id_pais</name>
         <rename>id_pais</rename>
-        <update>N</update>
+        <default/>
+        <type>Integer</type>
       </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>1728</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Buscar_id_suscripcion</name>
+    <type>StreamLookup</type>
+    <description>Busca id_suscripcion en dim_suscripcion por tipo_suscripcion normalizado</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Suscripcion</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>tipo_suscripcion_norm</name>
+        <field>tipo_suscripcion</field>
+      </key>
+      <value>
+        <name>id_suscripcion</name>
+        <rename>id_suscripcion</rename>
+        <default/>
+        <type>Integer</type>
+      </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>1344</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Buscar_id_tiempo</name>
+    <type>StreamLookup</type>
+    <description>Busca id_tiempo en dim_tiempo por fecha_pago (last_payment_date parseada a Date)</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Tiempo_Ingresos</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>fecha_pago</name>
+        <field>fecha_completa</field>
+      </key>
       <value>
         <name>id_tiempo</name>
         <rename>id_tiempo</rename>
-        <update>N</update>
-      </value>
-      <value>
-        <name>ingreso_mensual</name>
-        <rename>ingreso_mensual</rename>
-        <update>Y</update>
+        <default/>
+        <type>Integer</type>
       </value>
     </lookup>
-    <update_bypassed>N</update_bypassed>
     <attributes/>
     <GUI>
-      <xloc>224</xloc>
-      <yloc>368</yloc>
+      <xloc>1920</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Sel_Campos_Final</name>
+    <type>SelectValues</type>
+    <description>Conserva solo los campos del modelo fact_ingresos: las cinco FKs mas ingreso_mensual</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <length>-2</length>
+        <name>id_usuario</name>
+        <precision>-2</precision>
+        <rename>id_usuario</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>id_suscripcion</name>
+        <precision>-2</precision>
+        <rename>id_suscripcion</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>id_dispositivo</name>
+        <precision>-2</precision>
+        <rename>id_dispositivo</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>id_pais</name>
+        <precision>-2</precision>
+        <rename>id_pais</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>id_tiempo</name>
+        <precision>-2</precision>
+        <rename>id_tiempo</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>ingreso_mensual</name>
+        <precision>-2</precision>
+        <rename>ingreso_mensual</rename>
+      </field>
+      <select_unspecified>N</select_unspecified>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>2112</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Sel_Campos_Ingresos</name>
+    <type>SelectValues</type>
+    <description>Selecciona los seis campos fuente para fact_ingresos</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <length>-2</length>
+        <name>user_id</name>
+        <precision>-2</precision>
+        <rename>user_id</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>subscription_type</name>
+        <precision>-2</precision>
+        <rename>subscription_type</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>device</name>
+        <precision>-2</precision>
+        <rename>device</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>country</name>
+        <precision>-2</precision>
+        <rename>country</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>last_payment_date</name>
+        <precision>-2</precision>
+        <rename>last_payment_date</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>monthly_revenue</name>
+        <precision>-2</precision>
+        <rename>monthly_revenue</rename>
+      </field>
+      <select_unspecified>N</select_unspecified>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>656</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Sel_Campos_Preparados</name>
+    <type>SelectValues</type>
+    <description>Conserva solo los seis campos generados por el JS, descarta los campos fuente originales</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <length>-2</length>
+        <name>id_usuario</name>
+        <precision>-2</precision>
+        <rename>id_usuario</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>tipo_suscripcion_norm</name>
+        <precision>-2</precision>
+        <rename>tipo_suscripcion_norm</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>nombre_dispositivo_norm</name>
+        <precision>-2</precision>
+        <rename>nombre_dispositivo_norm</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>nombre_pais_norm</name>
+        <precision>-2</precision>
+        <rename>nombre_pais_norm</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>fecha_pago</name>
+        <precision>-2</precision>
+        <rename>fecha_pago</rename>
+      </field>
+      <field>
+        <length>-2</length>
+        <name>ingreso_mensual</name>
+        <precision>-2</precision>
+        <rename>ingreso_mensual</rename>
+      </field>
+      <select_unspecified>N</select_unspecified>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>1040</xloc>
+      <yloc>400</yloc>
     </GUI>
   </transform>
   <transform_error_handling>
