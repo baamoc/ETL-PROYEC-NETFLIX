@@ -79,11 +79,13 @@
         <condition>=</condition>
         <field>tipo_suscripcion</field>
         <name>tipo_suscripcion</name>
+        <name2/>
       </key>
       <key>
         <condition>=</condition>
         <field>duracion_plan</field>
         <name>duracion_plan</name>
+        <name2/>
       </key>
       <schema>dm_streaming</schema>
       <table>dim_suscripcion</table>

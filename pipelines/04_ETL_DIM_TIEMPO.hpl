@@ -62,14 +62,29 @@
     </hop>
     <hop>
       <from>Validar_Fecha</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Existente</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Verificar_Existente</from>
+      <to>Filtrar_Nuevos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filtrar_Nuevos</from>
       <to>Cargar_DIM_Tiempo</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>Cargar_DIM_Tiempo</name>
-    <type>InsertUpdate</type>
-    <description>Upsert en dm_streaming.dim_tiempo; lookup por fecha_completa evita duplicados en re-ejecuciones</description>
+    <name>Leer_DIM_Existente</name>
+    <type>TableInput</type>
+    <description>Lee fecha_completa existentes en dim_tiempo para el StreamLookup de deduplicacion</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -77,42 +92,119 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <commit>100</commit>
     <connection>Proyecto-Neonbd</connection>
-    <lookup>
-      <key>
-        <condition>=</condition>
-        <field>fecha_completa</field>
-        <name>fecha_completa</name>
-        <name2/>
-      </key>
-      <schema>dm_streaming</schema>
-      <table>dim_tiempo</table>
-      <value>
-        <name>fecha_completa</name>
-        <rename>fecha_completa</rename>
-        <update>N</update>
-      </value>
-      <value>
-        <name>dia</name>
-        <rename>dia</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>mes</name>
-        <rename>mes</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>anio</name>
-        <rename>anio</rename>
-        <update>Y</update>
-      </value>
-    </lookup>
-    <update_bypassed>N</update_bypassed>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT fecha_completa FROM dm_streaming.dim_tiempo</sql>
+    <variables_active>N</variables_active>
     <attributes/>
     <GUI>
       <xloc>832</xloc>
+      <yloc>512</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Verificar_Existente</name>
+    <type>StreamLookup</type>
+    <description>Verifica si fecha_completa ya existe en dim_tiempo; null en fecha_existe significa fecha nueva</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Existente</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>fecha_completa</name>
+        <field>fecha_completa</field>
+      </key>
+      <value>
+        <name>fecha_completa</name>
+        <rename>fecha_existe</rename>
+        <default/>
+        <type>Date</type>
+      </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>992</xloc>
+      <yloc>368</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Filtrar_Nuevos</name>
+    <type>FilterRows</type>
+    <description>Solo pasan fechas nuevas (fecha_existe IS NULL); las ya cargadas se descartan sin error</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <compare>
+      <condition>
+        <conditions>
+</conditions>
+        <function>IS NULL</function>
+        <leftvalue>fecha_existe</leftvalue>
+        <negated>N</negated>
+        <operator>-</operator>
+      </condition>
+    </compare>
+    <send_true_to>Cargar_DIM_Tiempo</send_true_to>
+    <attributes/>
+    <GUI>
+      <xloc>1152</xloc>
+      <yloc>368</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Cargar_DIM_Tiempo</name>
+    <type>TableOutput</type>
+    <description>INSERT masivo en dm_streaming.dim_tiempo; solo llegan fechas nuevas del StreamLookup</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <schema>dm_streaming</schema>
+    <table>dim_tiempo</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <fields>
+      <field>
+        <column_name>fecha_completa</column_name>
+        <stream_name>fecha_completa</stream_name>
+      </field>
+      <field>
+        <column_name>dia</column_name>
+        <stream_name>dia</stream_name>
+      </field>
+      <field>
+        <column_name>mes</column_name>
+        <stream_name>mes</stream_name>
+      </field>
+      <field>
+        <column_name>anio</column_name>
+        <stream_name>anio</stream_name>
+      </field>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>1312</xloc>
       <yloc>368</yloc>
     </GUI>
   </transform>
@@ -457,7 +549,7 @@ WHERE date_added IS NOT NULL</sql>
         <operator>-</operator>
       </condition>
     </compare>
-    <send_true_to>Cargar_DIM_Tiempo</send_true_to>
+    <send_true_to>SL_Verificar_Existente</send_true_to>
     <attributes/>
     <GUI>
       <xloc>672</xloc>

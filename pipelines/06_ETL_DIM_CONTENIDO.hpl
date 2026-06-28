@@ -62,14 +62,29 @@
     </hop>
     <hop>
       <from>Validar_Contenido</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_DIM_Existente</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Verificar_Existente</from>
+      <to>Filtrar_Nuevos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filtrar_Nuevos</from>
       <to>Cargar_DIM_Contenido</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>Cargar_DIM_Contenido</name>
-    <type>InsertUpdate</type>
-    <description>Upsert en dm_streaming.dim_contenido; lookup por id_contenido evita duplicados en re-ejecuciones</description>
+    <name>Leer_DIM_Existente</name>
+    <type>TableInput</type>
+    <description>Lee id_contenido existentes en dim_contenido para el StreamLookup de deduplicacion</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -77,72 +92,143 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <commit>1000</commit>
     <connection>Proyecto-Neonbd</connection>
-    <lookup>
-      <key>
-        <condition>=</condition>
-        <field>id_contenido</field>
-        <name>id_contenido</name>
-        <name2/>
-      </key>
-      <schema>dm_streaming</schema>
-      <table>dim_contenido</table>
-      <value>
-        <name>id_contenido</name>
-        <rename>id_contenido</rename>
-        <update>N</update>
-      </value>
-      <value>
-        <name>titulo</name>
-        <rename>titulo</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>tipo_contenido</name>
-        <rename>tipo_contenido</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>director</name>
-        <rename>director</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>elenco</name>
-        <rename>elenco</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>clasificacion</name>
-        <rename>clasificacion</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>duracion</name>
-        <rename>duracion</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>genero</name>
-        <rename>genero</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>descripcion</name>
-        <rename>descripcion</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>anio_lanzamiento</name>
-        <rename>anio_lanzamiento</rename>
-        <update>Y</update>
-      </value>
-    </lookup>
-    <update_bypassed>N</update_bypassed>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_contenido FROM dm_streaming.dim_contenido</sql>
+    <variables_active>N</variables_active>
     <attributes/>
     <GUI>
       <xloc>1056</xloc>
+      <yloc>576</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Verificar_Existente</name>
+    <type>StreamLookup</type>
+    <description>Verifica si id_contenido ya existe en dim_contenido; null en id_existe significa contenido nuevo</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_DIM_Existente</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>id_contenido</name>
+        <field>id_contenido</field>
+      </key>
+      <value>
+        <name>id_contenido</name>
+        <rename>id_existe</rename>
+        <default/>
+        <type>String</type>
+      </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>1216</xloc>
+      <yloc>432</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Filtrar_Nuevos</name>
+    <type>FilterRows</type>
+    <description>Solo pasan contenidos nuevos (id_existe IS NULL); los ya cargados se descartan sin error</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <compare>
+      <condition>
+        <conditions>
+</conditions>
+        <function>IS NULL</function>
+        <leftvalue>id_existe</leftvalue>
+        <negated>N</negated>
+        <operator>-</operator>
+      </condition>
+    </compare>
+    <send_true_to>Cargar_DIM_Contenido</send_true_to>
+    <attributes/>
+    <GUI>
+      <xloc>1376</xloc>
+      <yloc>432</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Cargar_DIM_Contenido</name>
+    <type>TableOutput</type>
+    <description>INSERT masivo en dm_streaming.dim_contenido; solo llegan contenidos nuevos del StreamLookup</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <schema>dm_streaming</schema>
+    <table>dim_contenido</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <fields>
+      <field>
+        <column_name>id_contenido</column_name>
+        <stream_name>id_contenido</stream_name>
+      </field>
+      <field>
+        <column_name>titulo</column_name>
+        <stream_name>titulo</stream_name>
+      </field>
+      <field>
+        <column_name>tipo_contenido</column_name>
+        <stream_name>tipo_contenido</stream_name>
+      </field>
+      <field>
+        <column_name>director</column_name>
+        <stream_name>director</stream_name>
+      </field>
+      <field>
+        <column_name>elenco</column_name>
+        <stream_name>elenco</stream_name>
+      </field>
+      <field>
+        <column_name>clasificacion</column_name>
+        <stream_name>clasificacion</stream_name>
+      </field>
+      <field>
+        <column_name>duracion</column_name>
+        <stream_name>duracion</stream_name>
+      </field>
+      <field>
+        <column_name>genero</column_name>
+        <stream_name>genero</stream_name>
+      </field>
+      <field>
+        <column_name>descripcion</column_name>
+        <stream_name>descripcion</stream_name>
+      </field>
+      <field>
+        <column_name>anio_lanzamiento</column_name>
+        <stream_name>anio_lanzamiento</stream_name>
+      </field>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>1536</xloc>
       <yloc>432</yloc>
     </GUI>
   </transform>
@@ -710,7 +796,7 @@ WHERE show_id IS NOT NULL</sql>
         <operator>-</operator>
       </condition>
     </compare>
-    <send_true_to>Cargar_DIM_Contenido</send_true_to>
+    <send_true_to>SL_Verificar_Existente</send_true_to>
     <attributes/>
     <GUI>
       <xloc>864</xloc>

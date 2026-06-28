@@ -97,14 +97,29 @@
     </hop>
     <hop>
       <from>Sel_Campos_Final</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Leer_FACT_Existente</from>
+      <to>SL_Verificar_Existente</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SL_Verificar_Existente</from>
+      <to>Filtrar_Nuevos</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filtrar_Nuevos</from>
       <to>Cargar_FACT_Ingresos</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>Cargar_FACT_Ingresos</name>
-    <type>InsertUpdate</type>
-    <description>Upsert en dm_streaming.fact_ingresos; lookup por id_usuario evita duplicados en re-ejecuciones individuales</description>
+    <name>Leer_FACT_Existente</name>
+    <type>TableInput</type>
+    <description>Lee id_usuario existentes en fact_ingresos para el StreamLookup de deduplicacion</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -112,52 +127,127 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <commit>1000</commit>
     <connection>Proyecto-Neonbd</connection>
-    <lookup>
-      <key>
-        <condition>=</condition>
-        <field>id_usuario</field>
-        <name>id_usuario</name>
-        <name2/>
-      </key>
-      <schema>dm_streaming</schema>
-      <table>fact_ingresos</table>
-      <value>
-        <name>id_usuario</name>
-        <rename>id_usuario</rename>
-        <update>N</update>
-      </value>
-      <value>
-        <name>id_suscripcion</name>
-        <rename>id_suscripcion</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>id_dispositivo</name>
-        <rename>id_dispositivo</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>id_pais</name>
-        <rename>id_pais</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>id_tiempo</name>
-        <rename>id_tiempo</rename>
-        <update>Y</update>
-      </value>
-      <value>
-        <name>ingreso_mensual</name>
-        <rename>ingreso_mensual</rename>
-        <update>Y</update>
-      </value>
-    </lookup>
-    <update_bypassed>N</update_bypassed>
+    <execute_each_row>N</execute_each_row>
+    <limit>0</limit>
+    <sql>SELECT id_usuario FROM dm_streaming.fact_ingresos</sql>
+    <variables_active>N</variables_active>
     <attributes/>
     <GUI>
       <xloc>2304</xloc>
+      <yloc>832</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>SL_Verificar_Existente</name>
+    <type>StreamLookup</type>
+    <description>Verifica si id_usuario ya tiene ingreso en fact_ingresos; null en id_existe significa registro nuevo</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Leer_FACT_Existente</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>N</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>id_usuario</name>
+        <field>id_usuario</field>
+      </key>
+      <value>
+        <name>id_usuario</name>
+        <rename>id_existe</rename>
+        <default/>
+        <type>Integer</type>
+      </value>
+    </lookup>
+    <attributes/>
+    <GUI>
+      <xloc>2464</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Filtrar_Nuevos</name>
+    <type>FilterRows</type>
+    <description>Solo pasan filas nuevas (id_existe IS NULL); los ya cargados se descartan sin error</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <compare>
+      <condition>
+        <conditions>
+</conditions>
+        <function>IS NULL</function>
+        <leftvalue>id_existe</leftvalue>
+        <negated>N</negated>
+        <operator>-</operator>
+      </condition>
+    </compare>
+    <send_true_to>Cargar_FACT_Ingresos</send_true_to>
+    <attributes/>
+    <GUI>
+      <xloc>2624</xloc>
+      <yloc>688</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>Cargar_FACT_Ingresos</name>
+    <type>TableOutput</type>
+    <description>INSERT masivo en dm_streaming.fact_ingresos; solo llegan filas nuevas del StreamLookup</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Proyecto-Neonbd</connection>
+    <schema>dm_streaming</schema>
+    <table>fact_ingresos</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <fields>
+      <field>
+        <column_name>id_usuario</column_name>
+        <stream_name>id_usuario</stream_name>
+      </field>
+      <field>
+        <column_name>id_suscripcion</column_name>
+        <stream_name>id_suscripcion</stream_name>
+      </field>
+      <field>
+        <column_name>id_dispositivo</column_name>
+        <stream_name>id_dispositivo</stream_name>
+      </field>
+      <field>
+        <column_name>id_pais</column_name>
+        <stream_name>id_pais</stream_name>
+      </field>
+      <field>
+        <column_name>id_tiempo</column_name>
+        <stream_name>id_tiempo</stream_name>
+      </field>
+      <field>
+        <column_name>ingreso_mensual</column_name>
+        <stream_name>ingreso_mensual</stream_name>
+      </field>
+    </fields>
+    <attributes/>
+    <GUI>
+      <xloc>2784</xloc>
       <yloc>688</yloc>
     </GUI>
   </transform>

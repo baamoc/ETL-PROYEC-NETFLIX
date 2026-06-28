@@ -43,6 +43,8 @@
       <create_parent_folder>N</create_parent_folder>
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/pipelines/UTIL_TRUNCATE_DM.hpl</filename>
+      <logext/>
+      <logfile/>
       <loglevel>Basic</loglevel>
       <parameters>
         <pass_all_parameters>N</pass_all_parameters>
@@ -105,7 +107,7 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>496</xloc>
+      <xloc>560</xloc>
       <yloc>512</yloc>
       <attributes_hac/>
     </action>
@@ -131,8 +133,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>496</xloc>
-      <yloc>400</yloc>
+      <xloc>560</xloc>
+      <yloc>304</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -157,8 +159,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>656</xloc>
-      <yloc>400</yloc>
+      <xloc>768</xloc>
+      <yloc>304</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -183,7 +185,7 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>704</xloc>
+      <xloc>768</xloc>
       <yloc>512</yloc>
       <attributes_hac/>
     </action>
@@ -209,8 +211,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>864</xloc>
-      <yloc>400</yloc>
+      <xloc>992</xloc>
+      <yloc>512</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -235,8 +237,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>960</xloc>
-      <yloc>512</yloc>
+      <xloc>992</xloc>
+      <yloc>304</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -261,8 +263,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>1072</xloc>
-      <yloc>400</yloc>
+      <xloc>1248</xloc>
+      <yloc>304</yloc>
       <attributes_hac/>
     </action>
   </actions>
