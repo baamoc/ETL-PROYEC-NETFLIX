@@ -65,12 +65,11 @@
       <to>Cargar_DIM_Contenido</to>
       <enabled>Y</enabled>
     </hop>
-
   </order>
   <transform>
     <name>Cargar_DIM_Contenido</name>
-    <type>TableOutput</type>
-    <description>Carga masiva con truncate en dm_streaming.dim_contenido; bulk insert mas rapido que InsertUpdate en Neon</description>
+    <type>InsertUpdate</type>
+    <description>Upsert en dm_streaming.dim_contenido; lookup por id_contenido evita duplicados en re-ejecuciones</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -78,17 +77,69 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>Proyecto-Neonbd</connection>
-    <schema>dm_streaming</schema>
-    <table>dim_contenido</table>
     <commit>1000</commit>
-    <truncate>N</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>N</specify_fields>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields/>
+    <connection>Proyecto-Neonbd</connection>
+    <lookup>
+      <key>
+        <condition>=</condition>
+        <field>id_contenido</field>
+        <name>id_contenido</name>
+        <name2/>
+      </key>
+      <schema>dm_streaming</schema>
+      <table>dim_contenido</table>
+      <value>
+        <name>id_contenido</name>
+        <rename>id_contenido</rename>
+        <update>N</update>
+      </value>
+      <value>
+        <name>titulo</name>
+        <rename>titulo</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>tipo_contenido</name>
+        <rename>tipo_contenido</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>director</name>
+        <rename>director</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>elenco</name>
+        <rename>elenco</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>clasificacion</name>
+        <rename>clasificacion</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>duracion</name>
+        <rename>duracion</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>genero</name>
+        <rename>genero</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>descripcion</name>
+        <rename>descripcion</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>anio_lanzamiento</name>
+        <rename>anio_lanzamiento</rename>
+        <update>Y</update>
+      </value>
+    </lookup>
+    <update_bypassed>N</update_bypassed>
     <attributes/>
     <GUI>
       <xloc>1056</xloc>
@@ -111,8 +162,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>director</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -121,8 +172,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>elenco</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -131,8 +182,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>rating</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -141,8 +192,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>duration</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -151,8 +202,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>genres</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -161,8 +212,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>description</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -171,8 +222,8 @@
         <case_sensitive>Y</case_sensitive>
         <in_stream_name>release_year</in_stream_name>
         <is_unicode>N</is_unicode>
-        <replace_string>^\s*$</replace_string>
         <replace_by_string>Sin dato</replace_by_string>
+        <replace_string>^\s*$</replace_string>
         <set_empty_string>N</set_empty_string>
         <use_regex>Y</use_regex>
         <whole_word>N</whole_word>
@@ -666,7 +717,6 @@ WHERE show_id IS NOT NULL</sql>
       <yloc>432</yloc>
     </GUI>
   </transform>
-
   <transform_error_handling>
   </transform_error_handling>
   <attributes/>

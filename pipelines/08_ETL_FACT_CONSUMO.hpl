@@ -83,8 +83,8 @@
   </order>
   <transform>
     <name>Cargar_FACT_Consumo</name>
-    <type>TableOutput</type>
-    <description>Carga masiva en fact_consumo; truncate previo via UTIL_TRUNCATE_DM garantiza tabla limpia antes de cada carga</description>
+    <type>InsertUpdate</type>
+    <description>Upsert en dm_streaming.fact_consumo; lookup por id_usuario + id_contenido evita duplicados en re-ejecuciones individuales</description>
     <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
@@ -92,17 +92,50 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>Proyecto-Neonbd</connection>
-    <schema>dm_streaming</schema>
-    <table>fact_consumo</table>
     <commit>1000</commit>
-    <truncate>N</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>N</specify_fields>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields/>
+    <connection>Proyecto-Neonbd</connection>
+    <lookup>
+      <key>
+        <condition>=</condition>
+        <field>id_usuario</field>
+        <name>id_usuario</name>
+        <name2/>
+      </key>
+      <key>
+        <condition>=</condition>
+        <field>id_contenido</field>
+        <name>id_contenido</name>
+        <name2/>
+      </key>
+      <schema>dm_streaming</schema>
+      <table>fact_consumo</table>
+      <value>
+        <name>id_usuario</name>
+        <rename>id_usuario</rename>
+        <update>N</update>
+      </value>
+      <value>
+        <name>id_contenido</name>
+        <rename>id_contenido</rename>
+        <update>N</update>
+      </value>
+      <value>
+        <name>id_pais</name>
+        <rename>id_pais</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>id_tiempo</name>
+        <rename>id_tiempo</rename>
+        <update>Y</update>
+      </value>
+      <value>
+        <name>cantidad_visualizaciones</name>
+        <rename>cantidad_visualizaciones</rename>
+        <update>Y</update>
+      </value>
+    </lookup>
+    <update_bypassed>N</update_bypassed>
     <attributes/>
     <GUI>
       <xloc>1824</xloc>
